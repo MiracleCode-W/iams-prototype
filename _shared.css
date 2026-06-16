@@ -1,0 +1,368 @@
+/* 消防内攻管理平台 - 共享样式 (Android, 橙色消防主题) */
+:root {
+  --primary: #FF9800;
+  --primary-dark: #E65100;
+  --primary-light: #FFE0B2;
+  --primary-tint: #FFF3E0;
+  --accent: #FFC107;
+  --bg: #F5F5F5;
+  --surface: #FFFFFF;
+  --surface-2: #FAFAFA;
+  --fg: #1A1A1A;
+  --fg-2: #333333;
+  --muted: #666666;
+  --meta: #999999;
+  --border: #E0E0E0;
+  --border-soft: #EEEEEE;
+  --danger: #D32F2F;
+  --danger-bg: #FFEBEE;
+  --warn: #FF9800;
+  --success: #2E7D32;
+  --success-bg: #E8F5E9;
+  --info: #1976D2;
+  --info-bg: #E3F2FD;
+  --timer-ok: #00897B;
+  --timer-warn: #FF9800;
+  --timer-danger: #D32F2F;
+  --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid rgba(255,152,0,0.42);
+  outline-offset: 2px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 原生系统状态栏 — 不再模拟, 让宿主系统显示 */
+.android-statusbar { display: none; }
+
+/* 底部导航 — 实色, 让原生导航栏在其下方 */
+.android-navbar {
+  height: 56px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-around;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 100;
+}
+.android-navbar .nav-btn {
+  flex: 1; height: 52px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  font-size: 10px; font-family: inherit;
+}
+.android-navbar .nav-btn svg { width: 22px; height: 22px; fill: currentColor; }
+.android-navbar .nav-btn.active { color: var(--primary); }
+.android-navbar .nav-btn:focus-visible { outline-offset: -4px; }
+
+.appbar {
+  background: var(--primary);
+  color: #fff;
+  height: 56px;
+  display: flex; align-items: center;
+  padding-left: 12px; padding-right: 12px;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  position: sticky; top: 0; z-index: 90;
+}
+.appbar .back { background: none; border: none; color: #fff; cursor: pointer; padding: 8px; display: flex; }
+.appbar .back svg { width: 22px; height: 22px; fill: #fff; }
+.appbar .title-block { flex: 1; min-width: 0; padding: 8px 0; }
+.appbar .title { font-size: 17px; font-weight: 600; line-height: 1.2; }
+.appbar .subtitle { font-size: 11px; opacity: 0.9; font-weight: 400; margin-top: 1px; }
+.appbar .action { background: none; border: none; color: #fff; padding: 8px; cursor: pointer; display: flex; }
+.appbar .action svg { width: 22px; height: 22px; fill: #fff; }
+
+.scroll-area {
+  position: absolute;
+  top: 56px; bottom: 0; left: 0; right: 0;
+  overflow-y: auto;
+  padding-bottom: 24px;
+}
+.scroll-area.with-nav { bottom: 0; padding-bottom: 72px; }
+.scroll-area.no-appbar { top: 0; padding-top: 0; }
+
+.card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  margin-bottom: 10px;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  height: 48px;
+  padding: 0 20px;
+  border-radius: var(--r-md);
+  font-size: 15px; font-weight: 600;
+  border: none; cursor: pointer;
+  font-family: inherit;
+  transition: background .15s, transform .05s;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:active { background: var(--primary-dark); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-secondary { background: var(--surface); color: var(--fg); border: 1px solid var(--border); }
+.btn-ghost { background: transparent; color: var(--primary); }
+.btn-block { width: 100%; }
+.btn-sm { height: 34px; padding: 0 12px; font-size: 13px; }
+
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+.field input, .field textarea, .field select {
+  width: 100%;
+  height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--fg);
+}
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-tint); }
+.field textarea { height: 72px; padding: 10px 12px; resize: none; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 22px; padding: 0 8px;
+  border-radius: var(--r-pill);
+  font-size: 11px; font-weight: 600;
+  background: var(--border-soft); color: var(--fg-2);
+  white-space: nowrap;
+}
+.pill-danger { background: var(--danger-bg); color: var(--danger); }
+.pill-warn { background: var(--primary-tint); color: var(--primary-dark); }
+.pill-success { background: var(--success-bg); color: var(--success); }
+.pill-info { background: var(--info-bg); color: var(--info); }
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+.divider { height: 1px; background: var(--border); margin: 8px 0; }
+.spacer-12 { height: 12px; } .spacer-20 { height: 20px; }
+
+.list-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-soft);
+}
+.list-item:active { background: var(--bg); }
+.list-item .avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--primary-tint); color: var(--primary-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 15px;
+}
+.list-item .meta { flex: 1; min-width: 0; }
+.list-item .meta .name { font-size: 15px; font-weight: 600; color: var(--fg); }
+.list-item .meta .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.empty {
+  padding: 60px 20px; text-align: center; color: var(--muted);
+}
+.empty .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+
+.section-title {
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 14px 16px 6px;
+}
+
+/* 弹窗遮罩 */
+.modal-mask {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; padding: 20px;
+}
+.business-modal {
+  width: 100%; max-width: 360px;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.business-modal .modal-head { padding: 16px 16px 8px; }
+.business-modal .modal-head h3 { font-size: 17px; font-weight: 600; color: var(--fg); }
+.business-modal .modal-body { padding: 8px 16px 16px; color: var(--fg-2); font-size: 14px; }
+.business-modal .modal-warning {
+  margin-top: 10px;
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
+  background: var(--danger-bg);
+  color: #7F1D1D;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+.business-modal .modal-actions { display: flex; border-top: 1px solid var(--border-soft); }
+.business-modal .modal-actions button {
+  flex: 1; height: 48px; background: none; border: none;
+  font-size: 15px; font-weight: 600; cursor: pointer; color: var(--muted);
+  font-family: inherit;
+}
+.business-modal .modal-actions button + button { border-left: 1px solid var(--border-soft); color: var(--primary); }
+.business-modal .modal-actions button.danger { color: var(--danger); }
+.business-modal .risk-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  font-size: 12px;
+  color: var(--muted);
+}
+.business-modal .risk-list b { color: var(--fg-2); }
+.toast {
+  position: fixed;
+  left: 16px; right: 16px; bottom: 72px;
+  z-index: 260;
+  min-height: 48px;
+  display: flex; align-items: center;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: rgba(26,26,26,0.94);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.24);
+}
+
+/* 状态栏图标 */
+.bars { display: inline-flex; gap: 1px; align-items: end; }
+.bars i { width: 2px; background: #fff; border-radius: 1px; }
+.bars i:nth-child(1){height:4px} .bars i:nth-child(2){height:6px}
+.bars i:nth-child(3){height:8px} .bars i:nth-child(4){height:10px}
+
+/* 内攻打板专用 */
+.attack-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  margin-bottom: 10px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.attack-card.warn {
+  background: var(--primary-tint);
+}
+.attack-card.warn::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px; background: var(--danger);
+}
+.attack-card .ac-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px 8px;
+}
+.attack-card .ac-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 14px;
+}
+.attack-card .ac-name { flex: 1; }
+.attack-card .ac-name .n { font-size: 15px; font-weight: 600; color: var(--fg); }
+.attack-card .ac-name .r { font-size: 11px; color: var(--muted); }
+.attack-card .ac-timer {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px; font-weight: 700;
+  color: var(--timer-ok);
+}
+.attack-card.warn .ac-timer { color: var(--timer-danger); }
+.attack-card .ac-meta {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  padding: 0 14px 12px;
+  gap: 8px;
+}
+.attack-card .ac-meta .cell .k { font-size: 10px; color: var(--muted); }
+.attack-card .ac-meta .cell .v { font-size: 13px; font-weight: 500; color: var(--fg); margin-top: 2px; }
+
+/* 超时状态卡片 (PRD 2.6.6) */
+.attack-card.timeout {
+  background: #FFEBEE;
+  animation: timeout-pulse 1.2s ease-in-out infinite;
+}
+.attack-card.timeout::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px; background: #B71C1C;
+}
+.attack-card.timeout .ac-timer { color: #B71C1C; }
+.attack-card.timeout .ac-name .n::after {
+  content: '⚠ 已超时'; display: inline-block;
+  margin-left: 6px; padding: 1px 6px;
+  font-size: 10px; font-weight: 700;
+  color: #fff; background: #B71C1C; border-radius: 3px;
+  vertical-align: middle;
+}
+@keyframes timeout-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(183,28,28,0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(183,28,28,0); }
+}
+
+/* 紧急撤离全屏覆盖 (PRD 2.6.7) */
+.evac-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 95;
+  background: #B71C1C; color: #fff;
+  padding: 8px 16px; text-align: center;
+  font-size: 13px; font-weight: 700; letter-spacing: 1px;
+  animation: evac-flash 0.8s ease-in-out infinite;
+}
+@keyframes evac-flash {
+  0%, 100% { background: #B71C1C; }
+  50% { background: #FF5252; }
+}
+.attack-card.evac { background: #FFEBEE; }
+.attack-card.evac::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px; background: #B71C1C;
+}
+.attack-card.evac .ac-name .n::after {
+  content: '⚠ 紧急撤离'; display: inline-block;
+  margin-left: 6px; padding: 1px 6px;
+  font-size: 10px; font-weight: 700;
+  color: #fff; background: #B71C1C; border-radius: 3px;
+}
+
+/* 长按按钮进度环 */
+.btn-hold {
+  position: relative; overflow: hidden;
+}
+.btn-hold .hold-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: rgba(255,255,255,0.25);
+  width: 0%;
+  transition: width 0.05s linear;
+}

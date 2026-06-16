@@ -1,0 +1,112 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>出场确认 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.dim-bg { background: rgba(0,0,0,0.55); position: fixed; inset: 0; z-index: 50; }
+.exit-modal { position: fixed; left: 16px; right: 16px; top: 50%; transform: translateY(-50%); background: var(--surface); border-radius: var(--r-lg); z-index: 60; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; }
+.exit-modal .hero { background: linear-gradient(135deg, var(--success) 0%, #1B5E20 100%); color: #fff; padding: 22px 20px; text-align: center; flex-shrink: 0; }
+.exit-modal .hero .ring { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; animation: nfc-pulse 1.5s infinite; }
+.exit-modal .hero .ring svg { width: 30px; height: 30px; fill: #fff; }
+@keyframes nfc-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); } 50% { box-shadow: 0 0 0 12px rgba(255,255,255,0); } }
+.exit-modal .hero h2 { font-size: 17px; font-weight: 700; }
+.exit-modal .hero .uid { font-size: 11px; opacity: 0.85; margin-top: 4px; font-family: var(--font-mono); }
+.exit-modal .body { padding: 18px 20px; overflow-y: auto; }
+.exit-modal .person-row { display: flex; align-items: center; gap: 14px; padding-bottom: 14px; border-bottom: 1px dashed var(--border); }
+.exit-modal .avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; }
+.exit-modal .person-row .info .n { font-size: 17px; font-weight: 700; color: var(--fg); }
+.exit-modal .person-row .info .r { font-size: 12px; color: var(--muted); margin-top: 2px; font-family: var(--font-mono); }
+.exit-modal .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-soft); border-radius: var(--r-md); overflow: hidden; margin-top: 14px; }
+.exit-modal .stats .cell { background: var(--surface); padding: 12px; text-align: center; }
+.exit-modal .stats .k { font-size: 11px; color: var(--muted); }
+.exit-modal .stats .v { font-size: 17px; font-weight: 700; font-family: var(--font-mono); color: var(--fg); margin-top: 4px; }
+.exit-modal .stats .v.safe { color: var(--success); }
+.exit-modal .timeline-mini { margin-top: 14px; padding: 10px 12px; background: var(--bg); border-radius: var(--r-sm); font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+.exit-modal .timeline-mini .row { display: flex; justify-content: space-between; padding: 3px 0; }
+.exit-modal .timeline-mini .row b { color: var(--fg-2); }
+.exit-modal .actions { display: flex; border-top: 1px solid var(--border-soft); flex-shrink: 0; }
+.exit-modal .actions button { flex: 1; height: 48px; background: none; border: none; font-size: 15px; font-weight: 600; cursor: pointer; color: var(--muted); font-family: inherit; }
+.exit-modal .actions button + button { border-left: 1px solid var(--border-soft); color: var(--success); }
+.audit-note { margin-top: 12px; padding: 10px 12px; background: #FFF8E1; border: 1px solid #FFE082; border-radius: var(--r-sm); font-size: 11px; color: #795B00; line-height: 1.45; }
+.exit-modal.saved .hero { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); }
+.exit-modal.saved .actions button + button { color: var(--primary-dark); }
+</style>
+</head>
+<body>
+
+<iframe src="01-board.html" style="position:fixed;inset:0;width:100%;height:100%;border:0;z-index:0;pointer-events:none"></iframe>
+<div class="dim-bg"></div>
+
+<div class="exit-modal">
+  <div class="hero">
+    <div class="ring"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+    <h2>NFC 出场识别成功</h2>
+    <div class="uid">UID 04:A3:B2:C1:D5:E7:F9</div>
+  </div>
+
+  <div class="body">
+    <div class="person-row">
+      <div class="avatar">王</div>
+      <div class="info">
+        <div class="n">王五 · 战斗员</div>
+        <div class="r">编号 003 · B 型血 · 26 岁</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="cell"><div class="k">本次时长</div><div class="v">21 : 36</div></div>
+      <div class="cell"><div class="k">剩余倒计时</div><div class="v safe">10 : 24</div></div>
+      <div class="cell"><div class="k">出场气压</div><div class="v">14.8 MPa</div></div>
+      <div class="cell"><div class="k">气压消耗</div><div class="v">13.7 MPa</div></div>
+    </div>
+
+    <div class="timeline-mini">
+      <div class="row"><span>进场</span><b>22:02:08</b></div>
+      <div class="row"><span>出场</span><b>22:23:44</b></div>
+      <div class="row"><span>气压修改</span><b>3 次</b></div>
+      <div class="row"><span>最后位置</span><b>B 座 13F 东</b></div>
+    </div>
+    <div class="audit-note" id="auditNote">待确认：确认后会写入出场记录、关闭该员倒计时，并生成审计事件 EVT-20260603-2244。</div>
+  </div>
+
+  <div class="actions">
+    <button onclick="location.href='01-board.html'">取消</button>
+    <button id="confirmExit" type="button">确认出场</button>
+  </div>
+</div>
+
+<script src="_shared.js"></script>
+<script>
+injectChrome({nav:false});
+let exitSaved = false;
+document.getElementById('confirmExit').addEventListener('click', () => {
+  if (exitSaved) {
+    location.href = '01-board.html';
+    return;
+  }
+  showBusinessConfirm({
+    title: '确认王五出场',
+    message: '确认后该员将从「内攻中」移入历史记录，倒计时停止，NFC UID 与出场气压会同时写入审计日志。',
+    confirmText: '确认并写入',
+    details: [
+      { k: 'UID', v: '04:A3:B2:C1:D5:E7:F9' },
+      { k: '出场气压', v: '14.8 MPa' },
+      { k: '剩余倒计时', v: '10:24' }
+    ],
+    onConfirm: () => {
+      const modal = document.querySelector('.exit-modal');
+      exitSaved = true;
+      modal.classList.add('saved');
+      modal.querySelector('.hero h2').textContent = '出场已确认';
+      document.getElementById('auditNote').textContent = '已写入：王五出场记录已保存，审计事件 EVT-20260603-2244，可在历史记录中查看。';
+      document.getElementById('confirmExit').textContent = '返回看板';
+      showToast('出场已确认 · 已关闭该员倒计时');
+    }
+  });
+});
+</script>
+</body>
+</html>

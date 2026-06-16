@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>消防内攻管理原型 · 屏幕索引</title>
+  <link rel="stylesheet" href="_shared.css">
+  <style>
+    body {
+      min-height: 100%;
+      padding: 32px 18px 40px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(255, 152, 0, 0.14), transparent 34%),
+        linear-gradient(180deg, #fff 0%, var(--bg) 52%);
+    }
+    .page {
+      width: min(960px, 100%);
+      margin: 0 auto;
+    }
+    .hero {
+      display: grid;
+      gap: 16px;
+      padding: 28px 0 22px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid var(--primary-light);
+      border-radius: var(--r-pill);
+      background: var(--primary-tint);
+      color: var(--primary-dark);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    h1 {
+      color: var(--fg);
+      font-size: clamp(28px, 5vw, 44px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+    .intro {
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .primary-action,
+    .secondary-action {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 16px;
+      border-radius: var(--r-md);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .primary-action {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(230, 81, 0, 0.18);
+    }
+    .secondary-action {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--fg-2);
+    }
+    .screen-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .screen-card {
+      display: grid;
+      gap: 8px;
+      min-height: 112px;
+      padding: 16px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-md);
+      background: var(--surface);
+      color: inherit;
+      text-decoration: none;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+    .screen-card:hover {
+      border-color: var(--primary-light);
+      box-shadow: 0 8px 20px rgba(230, 81, 0, 0.1);
+      transform: translateY(-1px);
+    }
+    .screen-card strong {
+      color: var(--fg);
+      font-size: 15px;
+    }
+    .screen-card span {
+      color: var(--meta);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    .note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    @media (max-width: 560px) {
+      body { padding: 22px 14px 28px; }
+      .hero { padding-top: 18px; }
+      .actions a { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero" aria-labelledby="pageTitle">
+      <div class="eyebrow">GitHub Pages 静态预览</div>
+      <h1 id="pageTitle">消防内攻管理原型</h1>
+      <p class="intro">用于在线查看 screens5 设计交付。原型为静态 HTML/CSS/JS，所有页面使用相对链接，适合直接部署到 GitHub Pages。</p>
+      <div class="actions">
+        <a class="primary-action" href="00-login.html">打开登录原型</a>
+        <a class="secondary-action" href="DESIGN-HANDOFF.md">查看交付说明</a>
+      </div>
+    </section>
+
+    <section class="screen-grid" aria-label="原型页面列表">
+      <a class="screen-card" href="00-login.html"><strong>登录</strong><span>00-login.html</span></a>
+      <a class="screen-card" href="00a-init.html"><strong>初始化向导</strong><span>00a-init.html</span></a>
+      <a class="screen-card" href="01-board.html"><strong>内攻看板</strong><span>01-board.html</span></a>
+      <a class="screen-card" href="02-roster.html"><strong>花名册</strong><span>02-roster.html</span></a>
+      <a class="screen-card" href="02a-add-officer.html"><strong>新增人员</strong><span>02a-add-officer.html</span></a>
+      <a class="screen-card" href="03-enter.html"><strong>进场确认</strong><span>03-enter.html</span></a>
+      <a class="screen-card" href="04-edit.html"><strong>状态修改</strong><span>04-edit.html</span></a>
+      <a class="screen-card" href="05-exit.html"><strong>出场确认</strong><span>05-exit.html</span></a>
+      <a class="screen-card" href="06-history.html"><strong>历史记录</strong><span>06-history.html</span></a>
+      <a class="screen-card" href="07-archive.html"><strong>归档查询</strong><span>07-archive.html</span></a>
+      <a class="screen-card" href="08-weather.html"><strong>天气方位</strong><span>08-weather.html</span></a>
+      <a class="screen-card" href="09-nfc-write.html"><strong>NFC 写入</strong><span>09-nfc-write.html</span></a>
+      <a class="screen-card" href="10-settings.html"><strong>系统设置</strong><span>10-settings.html</span></a>
+      <a class="screen-card" href="11-audit.html"><strong>审计日志</strong><span>11-audit.html</span></a>
+      <a class="screen-card" href="12-backup.html"><strong>备份恢复</strong><span>12-backup.html</span></a>
+    </section>
+
+    <p class="note">发布提示：GitHub Pages 选择 main / root 作为来源；根目录保留 .nojekyll，确保 _shared.css 和 _shared.js 正常访问。</p>
+  </main>
+</body>
+</html>

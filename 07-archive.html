@@ -1,0 +1,186 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>归档查询 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.search-area { background: var(--surface); padding: 12px 16px; border-bottom: 1px solid var(--border-soft); }
+.date-range { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.date-pill { flex: 1; height: 38px; padding: 0 12px; background: var(--bg); border-radius: var(--r-sm); border: 1px solid var(--border); display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fg); cursor: pointer; font-family: var(--font-mono); }
+.date-pill svg { width: 14px; height: 14px; fill: var(--muted); }
+.date-pill .arrow { color: var(--muted); }
+.chip-row { display: flex; gap: 6px; overflow-x: auto; }
+.chip-row::-webkit-scrollbar { display: none; }
+.chip-row .chip { flex-shrink: 0; padding: 5px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-pill); font-size: 12px; color: var(--fg-2); cursor: pointer; }
+.chip-row .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+.month-bar { padding: 14px 16px 6px; font-size: 12px; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; }
+.month-bar .cnt { color: var(--primary-dark); margin-left: 4px; }
+.arc-card { background: var(--surface); margin: 0 12px 8px; border-radius: var(--r-md); padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); cursor: pointer; }
+.arc-card .top-row { display: flex; align-items: flex-start; gap: 10px; }
+.arc-card .day { width: 44px; flex-shrink: 0; text-align: center; padding: 6px 0; background: var(--bg); border-radius: var(--r-sm); }
+.arc-card .day .d { font-size: 18px; font-weight: 700; color: var(--fg); font-family: var(--font-mono); line-height: 1; }
+.arc-card .day .m { font-size: 10px; color: var(--muted); margin-top: 2px; font-family: var(--font-mono); }
+.arc-card .meta { flex: 1; min-width: 0; }
+.arc-card .meta .addr { font-size: 14px; font-weight: 600; color: var(--fg); line-height: 1.35; }
+.arc-card .meta .row2 { display: flex; gap: 10px; font-size: 11px; color: var(--muted); margin-top: 4px; font-family: var(--font-mono); }
+.arc-card .meta .row2 .sep { color: var(--border); }
+.arc-card .meta .pills { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.arc-card .bottom-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-soft); font-size: 11px; }
+.arc-card .bottom-row .stat { color: var(--muted); }
+.arc-card .bottom-row .stat b { color: var(--fg-2); font-family: var(--font-mono); }
+.arc-card .bottom-row .links { display: flex; gap: 12px; }
+.arc-card .bottom-row .links a { color: var(--primary-dark); font-weight: 600; cursor: pointer; }
+.export-bar { position: fixed; bottom: 56px; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; gap: 10px; z-index: 89; }
+.export-bar .info { flex: 1; font-size: 11px; color: var(--muted); align-self: center; }
+.export-bar .info b { color: var(--fg-2); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <button class="back" onclick="location.href='06-history.html'"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <div class="title-block"><div class="title">归档查询</div><div class="subtitle">本地存储 · 加密</div></div>
+  <button class="action"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button>
+</div>
+
+<div class="scroll-area with-nav" style="padding-bottom:140px">
+  <div class="search-area">
+    <div class="date-range">
+      <div class="date-pill">
+        <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+        2026-05-04
+      </div>
+      <span class="arrow">→</span>
+      <div class="date-pill">
+        <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+        2026-06-03
+      </div>
+    </div>
+    <div class="chip-row">
+      <div class="chip active">全部 14</div>
+      <div class="chip">本月 6</div>
+      <div class="chip">高层 8</div>
+      <div class="chip">化工 2</div>
+      <div class="chip">车辆 4</div>
+      <div class="chip">异常 3</div>
+    </div>
+  </div>
+
+  <div class="month-bar">2026 年 6 月<span class="cnt"> · 3 场</span></div>
+
+  <div class="arc-card">
+    <div class="top-row">
+      <div class="day"><div class="d">03</div><div class="m">06/03</div></div>
+      <div class="meta">
+        <div class="addr">SOHO 现代城 B 座 14F 火警</div>
+        <div class="row2"><span>21:50 出警</span><span class="sep">·</span><span>朝阳区</span><span class="sep">·</span><span>高层</span></div>
+        <div class="pills">
+          <span class="pill pill-warn">进行中</span>
+          <span class="pill pill-danger">1 低气量</span>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-row">
+      <div class="stat">参与 <b>8</b> 人 · 已出 <b>3</b> · 在内 <b>5</b></div>
+      <div class="links"><a>详情</a><a>导出</a></div>
+    </div>
+  </div>
+
+  <div class="arc-card">
+    <div class="top-row">
+      <div class="day"><div class="d">01</div><div class="m">06/01</div></div>
+      <div class="meta">
+        <div class="addr">建国路加油站三号罐区泄漏</div>
+        <div class="row2"><span>14:22 出警</span><span class="sep">·</span><span>朝阳区</span><span class="sep">·</span><span>化工</span></div>
+        <div class="pills">
+          <span class="pill pill-success">已完结</span>
+          <span class="pill">耗时 1h12m</span>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-row">
+      <div class="stat">参与 <b>6</b> 人 · 修改 <b>14</b> 次</div>
+      <div class="links"><a>详情</a><a>导出</a></div>
+    </div>
+  </div>
+
+  <div class="arc-card">
+    <div class="top-row">
+      <div class="day"><div class="d">28</div><div class="m">05/28</div></div>
+      <div class="meta">
+        <div class="addr">华贸中心地下车库车辆自燃</div>
+        <div class="row2"><span>09:08 出警</span><span class="sep">·</span><span>朝阳区</span><span class="sep">·</span><span>车辆</span></div>
+        <div class="pills">
+          <span class="pill pill-success">已完结</span>
+          <span class="pill pill-danger">异常</span>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-row">
+      <div class="stat">参与 <b>4</b> 人 · 修改 <b>9</b> 次</div>
+      <div class="links"><a>详情</a><a>导出</a></div>
+    </div>
+  </div>
+
+  <div class="month-bar">2026 年 5 月<span class="cnt"> · 8 场</span></div>
+
+  <div class="arc-card">
+    <div class="top-row">
+      <div class="day"><div class="d">22</div><div class="m">05/22</div></div>
+      <div class="meta">
+        <div class="addr">金台路居民楼 7 层厨房起火</div>
+        <div class="row2"><span>19:46 出警</span><span class="sep">·</span><span>朝阳区</span><span class="sep">·</span><span>住宅</span></div>
+        <div class="pills"><span class="pill pill-success">已完结</span><span class="pill">耗时 38m</span></div>
+      </div>
+    </div>
+    <div class="bottom-row">
+      <div class="stat">参与 <b>5</b> 人 · 修改 <b>8</b> 次</div>
+      <div class="links"><a>详情</a><a>导出</a></div>
+    </div>
+  </div>
+
+  <div class="arc-card">
+    <div class="top-row">
+      <div class="day"><div class="d">15</div><div class="m">05/15</div></div>
+      <div class="meta">
+        <div class="addr">国贸三期 C 座 47F 消防演练</div>
+        <div class="row2"><span>10:00 出警</span><span class="sep">·</span><span>朝阳区</span><span class="sep">·</span><span>演练</span></div>
+        <div class="pills"><span class="pill pill-info">演练</span><span class="pill">耗时 2h05m</span></div>
+      </div>
+    </div>
+    <div class="bottom-row">
+      <div class="stat">参与 <b>12</b> 人 · 修改 <b>34</b> 次</div>
+      <div class="links"><a>详情</a><a>导出</a></div>
+    </div>
+  </div>
+
+  <div class="arc-card">
+    <div class="top-row">
+      <div class="day"><div class="d">07</div><div class="m">05/07</div></div>
+      <div class="meta">
+        <div class="addr">朝阳大悦城 5F 餐饮区油锅</div>
+        <div class="row2"><span>20:32 出警</span><span class="sep">·</span><span>朝阳区</span><span class="sep">·</span><span>商业</span></div>
+        <div class="pills"><span class="pill pill-success">已完结</span><span class="pill pill-danger">异常</span></div>
+      </div>
+    </div>
+    <div class="bottom-row">
+      <div class="stat">参与 <b>7</b> 人 · 修改 <b>11</b> 次</div>
+      <div class="links"><a>详情</a><a>导出</a></div>
+    </div>
+  </div>
+
+  <div style="padding:20px 16px 100px;text-align:center;color:var(--meta);font-size:11px">— 下拉加载更早记录 —</div>
+</div>
+
+<div class="export-bar">
+  <div class="info">已选 <b>0 / 14</b> · 加密本地 <b>2.4 MB</b></div>
+  <button class="btn btn-secondary" style="flex:0 0 auto;padding:0 16px">全选</button>
+  <button class="btn btn-primary" style="flex:0 0 auto;padding:0 18px">导出 CSV</button>
+</div>
+
+<script src="_shared.js"></script>
+<script>injectChrome({nav:'history'});</script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>历史记录 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.scene-head { background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%); color: #fff; padding: 14px 16px 16px; }
+.scene-head .addr { font-size: 13px; opacity: 0.92; line-height: 1.4; }
+.scene-head .addr b { display: block; font-size: 15px; font-weight: 700; margin-bottom: 2px; opacity: 1; }
+.scene-head .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: rgba(255,255,255,0.18); margin-top: 12px; border-radius: var(--r-md); overflow: hidden; }
+.scene-head .stats .c { background: rgba(0,0,0,0.12); padding: 10px 4px; text-align: center; }
+.scene-head .stats .n { font-size: 19px; font-weight: 700; font-family: var(--font-mono); line-height: 1; }
+.scene-head .stats .l { font-size: 10px; opacity: 0.85; margin-top: 4px; }
+.archive-bar { background: var(--surface); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-soft); }
+.archive-bar .l { font-size: 12px; color: var(--muted); }
+.archive-bar .l b { color: var(--fg-2); font-family: var(--font-mono); }
+.archive-bar .btn-arc { background: var(--accent); color: var(--fg); border: none; height: 32px; padding: 0 14px; border-radius: var(--r-pill); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 4px; }
+.archive-bar .btn-arc svg { width: 14px; height: 14px; fill: var(--fg); }
+.tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
+.tabs .tab { flex: 1; padding: 12px 0; text-align: center; font-size: 13px; color: var(--muted); cursor: pointer; position: relative; font-weight: 500; background: none; border: none; font-family: inherit; }
+.tabs .tab.active { color: var(--primary-dark); font-weight: 700; }
+.tabs .tab.active::after { content: ''; position: absolute; bottom: 0; left: 30%; right: 30%; height: 3px; background: var(--primary); border-radius: 2px 2px 0 0; }
+.history-status { padding: 8px 16px; background: var(--bg); color: var(--muted); font-size: 12px; }
+.time-feed { display: none; margin: 10px 12px; background: var(--surface); border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--border-soft); }
+.time-feed .row { display: grid; grid-template-columns: 64px 1fr; gap: 8px; padding: 11px 12px; border-bottom: 1px solid var(--border-soft); font-size: 12px; }
+.time-feed .row:last-child { border-bottom: none; }
+.time-feed .t { font-family: var(--font-mono); color: var(--muted); }
+.time-feed .d b { color: var(--danger); }
+.history-card { background: var(--surface); margin: 10px 12px; border-radius: var(--r-md); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.hc-head { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+.hc-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-tint); color: var(--primary-dark); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+.hc-avatar.warn { background: var(--danger); color: #fff; }
+.hc-avatar.done { background: var(--success-bg); color: var(--success); }
+.hc-name { flex: 1; min-width: 0; }
+.hc-name .n { font-size: 15px; font-weight: 700; color: var(--fg); }
+.hc-name .r { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: var(--font-mono); }
+.hc-dur { text-align: right; font-family: var(--font-mono); }
+.hc-dur .big { font-size: 18px; font-weight: 700; color: var(--fg-2); }
+.hc-dur .big.live { color: var(--danger); }
+.hc-dur .lb { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.ie-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border-soft); }
+.ie-row { padding: 10px 14px; }
+.ie-row + .ie-row { border-left: 1px solid var(--border-soft); }
+.ie-row .top { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.ie-row .top .dot { width: 8px; height: 8px; border-radius: 50%; }
+.ie-row .top .dot.in { background: var(--success); }
+.ie-row .top .dot.out { background: var(--info); }
+.ie-row .top .dot.live { background: var(--danger); animation: pulse 1.5s infinite; }
+@keyframes pulse { 50% { opacity: 0.4; } }
+.ie-row .time { font-size: 14px; font-weight: 700; color: var(--fg); margin-top: 4px; font-family: var(--font-mono); }
+.ie-row .pr { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: var(--font-mono); }
+.timeline { border-top: 1px dashed var(--border); padding: 10px 14px; background: var(--bg); }
+.timeline .th { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+.timeline .ev { display: flex; gap: 8px; font-size: 11px; font-family: var(--font-mono); color: var(--fg-2); padding: 3px 0; }
+.timeline .ev .t { color: var(--muted); flex-shrink: 0; }
+.timeline .ev .d { flex: 1; }
+.timeline .ev .d b { color: var(--danger); }
+.timeline .ev .d i { color: var(--success); font-style: normal; }
+
+/* PRD 2.10.3 异常标注 */
+.exit-tag { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700; gap: 4px; margin-left: 6px; }
+.exit-tag.evac { background: #B71C1C; color: #fff; }
+.exit-tag.manual { background: #FFF59D; color: #795B00; }
+.exit-tag.timeout { background: #FFEBEE; color: #B71C1C; border: 1px solid #B71C1C; }
+.exit-tag.session { background: var(--info-bg); color: var(--info); }
+.history-card.evac-card { border-left: 4px solid #B71C1C; }
+.history-card.manual-card { border-left: 4px solid #FBC02D; }
+.history-card.timeout-card { border-left: 4px solid #B71C1C; }
+.timeline .audit-row { background: #FFF8E1; padding: 6px 8px; border-radius: 4px; margin-top: 6px; }
+.timeline .audit-row .lab { color: #795B00; font-weight: 700; font-size: 10px; }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <button class="back" onclick="location.href='01-board.html'"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <div class="title-block"><div class="title">历史记录</div><div class="subtitle">本场次进出场 · 修改日志</div></div>
+  <button class="action"><svg viewBox="0 0 24 24"><path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/></svg></button>
+</div>
+
+<div class="scroll-area with-nav">
+
+<div class="scene-head">
+  <div class="addr"><b>SOHO 现代城 B 座 14F 火警</b>朝阳区建国路 87 号 · 2026-06-03 21:50 出警</div>
+  <div class="stats">
+    <div class="c"><div class="n">8</div><div class="l">参与人次</div></div>
+    <div class="c"><div class="n">3</div><div class="l">正常出场</div></div>
+    <div class="c"><div class="n" style="color:#FFCDD2">3</div><div class="l">异常</div></div>
+    <div class="c"><div class="n">22:14</div><div class="l">总时长</div></div>
+  </div>
+</div>
+
+<div class="archive-bar">
+  <div class="l">最近修改 <b>22:23:44</b> · 共 <b>17</b> 条事件</div>
+  <button class="btn-arc" onclick="location.href='07-archive.html'">
+    <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>
+    归档
+  </button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-history-view="person">按人员</button>
+  <button class="tab" data-history-view="time">按时间</button>
+  <button class="tab" data-history-view="risk">异常 <span style="display:inline-block;min-width:16px;height:16px;line-height:16px;background:var(--danger);color:#fff;border-radius:8px;font-size:10px;font-weight:700;padding:0 4px;margin-left:2px;font-family:var(--font-mono)">3</span></button>
+</div>
+<div class="history-status" id="historyStatus" role="status">按人员显示 · 5 条人员记录</div>
+
+<div class="time-feed" id="timeFeed">
+  <div class="row"><span class="t">22:23:44</span><span class="d">王五 NFC 出场确认 · 14.8 MPa · 审计 EVT-2244</span></div>
+  <div class="row"><span class="t">22:23:08</span><span class="d">张伟触发 <b>全员紧急撤离</b> · 等待批量确认</span></div>
+  <div class="row"><span class="t">22:14:00</span><span class="d">唐明气压降至 <b>0.0 MPa</b> · 超时报警升级 P1</span></div>
+  <div class="row"><span class="t">22:06:55</span><span class="d">周浩手动录入气压 18.5 MPa · 原因：NFC 重试失败</span></div>
+  <div class="row"><span class="t">21:58:28</span><span class="d">NFC 三次重试失败 · 安全员张伟手动进场 009</span></div>
+</div>
+
+<div class="history-card timeout-card" data-risk="true">
+  <div class="hc-head">
+    <div class="hc-avatar warn">特</div>
+    <div class="hc-name"><div class="n">唐明 · 指挥员 <span class="exit-tag timeout">⚠ 已超时 02:14</span></div><div class="r">编号 001 · A型 · 28岁</div></div>
+    <div class="hc-dur"><div class="big live">22:14</div><div class="lb">进行中</div></div>
+  </div>
+  <div class="ie-grid">
+    <div class="ie-row"><div class="top"><span class="dot in"></span>进场</div><div class="time">21:52:08</div><div class="pr">气压 30.0 MPa</div></div>
+    <div class="ie-row"><div class="top"><span class="dot live"></span>当前 (超时)</div><div class="time">22:14:22</div><div class="pr" style="color:#B71C1C;font-weight:700">气压 0.0 MPa · 超 02:14</div></div>
+  </div>
+  <div class="timeline">
+    <div class="th">气压修改 (3 次)</div>
+    <div class="ev"><span class="t">22:02:08</span><span class="d">气压 <i>30.0</i> → <b>22.0</b> MPa · 倒计 27:54</span></div>
+    <div class="ev"><span class="t">22:09:31</span><span class="d">气压 22.0 → <b>14.6</b> MPa · 倒计 18:31</span></div>
+    <div class="ev"><span class="t">22:14:00</span><span class="d">气压 14.6 → <b>0.0</b> MPa · 倒计 <b>00:00 ⚠</b></span></div>
+  </div>
+</div>
+
+<div class="history-card" data-risk="false">
+  <div class="hc-head">
+    <div class="hc-avatar done">林</div>
+    <div class="hc-name"><div class="n">林峰 · 战斗员</div><div class="r">编号 007 · B型 · 27岁</div></div>
+    <div class="hc-dur"><div class="big">18:42</div><div class="lb">正常出场</div></div>
+  </div>
+  <div class="ie-grid">
+    <div class="ie-row"><div class="top"><span class="dot in"></span>进场</div><div class="time">21:55:14</div><div class="pr">气压 29.2 MPa</div></div>
+    <div class="ie-row"><div class="top"><span class="dot out"></span>出场</div><div class="time">22:13:56</div><div class="pr">气压 16.3 MPa · 剩 13:14</div></div>
+  </div>
+  <div class="timeline">
+    <div class="th">气压修改 (2 次)</div>
+    <div class="ev"><span class="t">22:04:21</span><span class="d">气压 29.2 → <b>22.8</b> MPa</span></div>
+    <div class="ev"><span class="t">22:11:08</span><span class="d">气压 22.8 → <b>16.3</b> MPa · 倒计 13:14</span></div>
+  </div>
+</div>
+
+<div class="history-card manual-card" data-risk="true">
+  <div class="hc-head">
+    <div class="hc-avatar done">周</div>
+    <div class="hc-name"><div class="n">周浩 · 战斗员 <span class="exit-tag manual">⚠ 手动录入</span></div><div class="r">编号 009 · A型 · 32岁</div></div>
+    <div class="hc-dur"><div class="big">15:08</div><div class="lb">正常出场</div></div>
+  </div>
+  <div class="ie-grid">
+    <div class="ie-row"><div class="top"><span class="dot in"></span>进场 (手动)</div><div class="time">21:58:30</div><div class="pr">气压 30.0 MPa</div></div>
+    <div class="ie-row"><div class="top"><span class="dot out"></span>出场</div><div class="time">22:13:38</div><div class="pr">气压 18.5 MPa · 剩 16:40</div></div>
+  </div>
+  <div class="timeline">
+    <div class="audit-row"><span class="lab">审计</span> 21:58:28 NFC 三次重试失败 → 安全员张伟手动输入编号 009 进场</div>
+    <div class="th" style="margin-top:8px">气压修改 (1 次)</div>
+    <div class="ev"><span class="t">22:06:55</span><span class="d">气压 30.0 → <b>18.5</b> MPa · 倒计 16:40</span></div>
+  </div>
+</div>
+
+<div class="history-card evac-card" data-risk="true">
+  <div class="hc-head">
+    <div class="hc-avatar warn">王</div>
+    <div class="hc-name"><div class="n">王五 · 战斗员 <span class="exit-tag evac">紧急撤离</span></div><div class="r">编号 003 · B型 · 26岁</div></div>
+    <div class="hc-dur"><div class="big" style="color:#B71C1C">21:36</div><div class="lb">紧急撤离</div></div>
+  </div>
+  <div class="ie-grid">
+    <div class="ie-row"><div class="top"><span class="dot in"></span>进场</div><div class="time">22:02:08</div><div class="pr">气压 28.5 MPa</div></div>
+    <div class="ie-row"><div class="top"><span class="dot out" style="background:#B71C1C"></span>撤离出场</div><div class="time">22:23:44</div><div class="pr">气压 14.8 MPa · 剩 10:24</div></div>
+  </div>
+  <div class="timeline">
+    <div class="audit-row"><span class="lab">审计</span> 22:23:08 安全员张伟触发<b>全员紧急撤离</b> · 操作人 admin · 全员强制出场</div>
+    <div class="th" style="margin-top:8px">气压修改 (3 次)</div>
+    <div class="ev"><span class="t">22:08:12</span><span class="d">气压 28.5 → <b>22.8</b> MPa · 倒计 21:00</span></div>
+    <div class="ev"><span class="t">22:15:40</span><span class="d">气压 22.8 → <b>18.2</b> MPa · 倒计 16:48</span></div>
+    <div class="ev"><span class="t">22:22:30</span><span class="d">气压 18.2 → <b>14.8</b> MPa · 倒计 10:24</span></div>
+  </div>
+</div>
+
+<div class="history-card" data-risk="true">
+  <div class="hc-head">
+    <div class="hc-avatar done" style="background:#FFF3E0;color:var(--primary-dark)">李</div>
+    <div class="hc-name"><div class="n">李伟 · 战斗员 <span class="exit-tag session">场次结束 *</span></div><div class="r">编号 005 · O型 · 30岁</div></div>
+    <div class="hc-dur"><div class="big">12:48</div><div class="lb">未正常出场</div></div>
+  </div>
+  <div class="ie-grid">
+    <div class="ie-row"><div class="top"><span class="dot in"></span>进场</div><div class="time">22:10:56</div><div class="pr">气压 28.0 MPa</div></div>
+    <div class="ie-row"><div class="top"><span class="dot out" style="background:#FBC02D"></span>场次结束 *</div><div class="time">22:23:44 *</div><div class="pr">气压 19.2 MPa · 未感应出场</div></div>
+  </div>
+  <div class="timeline">
+    <div class="audit-row"><span class="lab">审计</span> 22:23:44 场次手动结束，该员仍在内攻中，状态记为<b>场次结束-未出场</b></div>
+  </div>
+</div>
+
+<div style="padding:24px 16px 80px;text-align:center;color:var(--meta);font-size:11px">— 共 4 名内攻人员 · 17 条事件 —</div>
+
+</div>
+
+<script src="_shared.js"></script>
+<script>
+injectChrome({nav:'history'});
+const historyStatus = document.getElementById('historyStatus');
+const timeFeed = document.getElementById('timeFeed');
+function switchHistoryView(view) {
+  document.querySelectorAll('[data-history-view]').forEach(tab => tab.classList.toggle('active', tab.dataset.historyView === view));
+  let visible = 0;
+  document.querySelectorAll('.history-card').forEach(card => {
+    const show = view === 'person' || (view === 'risk' && card.dataset.risk === 'true');
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  timeFeed.style.display = view === 'time' ? 'block' : 'none';
+  if (view === 'time') historyStatus.textContent = '按时间显示 · 5 条关键事件';
+  if (view === 'person') historyStatus.textContent = `按人员显示 · ${visible} 条人员记录`;
+  if (view === 'risk') historyStatus.textContent = `异常筛选 · ${visible} 条高风险记录`;
+}
+document.querySelectorAll('[data-history-view]').forEach(tab => {
+  tab.addEventListener('click', () => switchHistoryView(tab.dataset.historyView));
+});
+</script>
+</body>
+</html>

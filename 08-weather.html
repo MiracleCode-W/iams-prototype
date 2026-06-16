@@ -1,0 +1,169 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>天气方位 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.wx-hero { background: linear-gradient(180deg, #29B6F6 0%, #0277BD 100%); color: #fff; padding: 20px 18px 24px; }
+.wx-hero .loc { display: flex; align-items: center; gap: 6px; font-size: 13px; opacity: 0.92; }
+.wx-hero .loc svg { width: 14px; height: 14px; fill: #fff; }
+.wx-hero .main { display: flex; align-items: flex-start; justify-content: space-between; margin-top: 8px; }
+.wx-hero .temp { font-size: 56px; font-weight: 200; line-height: 1; font-family: var(--font-mono); }
+.wx-hero .temp .u { font-size: 22px; opacity: 0.7; vertical-align: top; }
+.wx-hero .desc { text-align: right; }
+.wx-hero .desc .ic { font-size: 38px; line-height: 1; }
+.wx-hero .desc .cond { font-size: 14px; margin-top: 4px; }
+.wx-hero .range { font-size: 11px; opacity: 0.85; margin-top: 4px; font-family: var(--font-mono); }
+.wind-card { background: var(--surface); margin: -16px 12px 0; border-radius: var(--r-md); padding: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: relative; z-index: 2; }
+.wind-card .hd { display: flex; align-items: center; justify-content: space-between; }
+.wind-card .hd .t { font-size: 13px; color: var(--muted); font-weight: 600; }
+.wind-card .hd .tag { font-size: 10px; padding: 2px 8px; background: var(--success-bg); color: var(--success); border-radius: var(--r-pill); font-weight: 600; }
+.compass-row { display: flex; gap: 14px; margin-top: 12px; align-items: center; }
+.compass { width: 130px; height: 130px; flex-shrink: 0; position: relative; }
+.compass svg { width: 100%; height: 100%; }
+.wind-data { flex: 1; }
+.wind-data .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px dashed var(--border-soft); }
+.wind-data .row:last-child { border-bottom: none; }
+.wind-data .row .k { color: var(--muted); }
+.wind-data .row .v { color: var(--fg); font-weight: 600; font-family: var(--font-mono); }
+.wind-data .row .v.hot { color: var(--danger); }
+.tip-strip { margin: 10px 12px; padding: 12px 14px; background: var(--primary-tint); border-left: 4px solid var(--primary); border-radius: var(--r-sm); }
+.tip-strip .tt { font-size: 12px; color: var(--primary-dark); font-weight: 700; }
+.tip-strip .tx { font-size: 12px; color: var(--fg-2); margin-top: 4px; line-height: 1.5; }
+.trace-card { background: var(--surface); margin: 0 12px 10px; border-radius: var(--r-md); border: 1px solid var(--border-soft); padding: 12px 14px; }
+.trace-card .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.trace-card .t { font-size: 13px; font-weight: 800; color: var(--fg); }
+.trace-card .s { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+.trace-card .btn-mini { min-height: 38px; padding: 0 12px; border-radius: var(--r-sm); border: 1px solid var(--primary); background: var(--primary-tint); color: var(--primary-dark); font-size: 12px; font-weight: 800; font-family: inherit; white-space: nowrap; }
+.hourly { background: var(--surface); margin: 0 12px 10px; border-radius: var(--r-md); padding: 12px 0; }
+.hourly .ttl { padding: 0 14px 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.hourly .scroll { display: flex; overflow-x: auto; padding: 0 14px; gap: 14px; }
+.hourly .scroll::-webkit-scrollbar { display: none; }
+.hourly .h { flex-shrink: 0; text-align: center; width: 44px; }
+.hourly .h .ti { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+.hourly .h .ic { font-size: 20px; margin: 4px 0; }
+.hourly .h .te { font-size: 14px; font-weight: 700; color: var(--fg); font-family: var(--font-mono); }
+.hourly .h .wd { font-size: 10px; color: var(--info); margin-top: 2px; font-family: var(--font-mono); }
+.hourly .h.now { background: var(--primary-tint); border-radius: var(--r-md); padding: 6px 0; }
+.hourly .h.now .ti { color: var(--primary-dark); font-weight: 700; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-soft); border-radius: var(--r-md); overflow: hidden; margin: 0 12px 10px; }
+.detail-grid .c { background: var(--surface); padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+.detail-grid .c svg { width: 22px; height: 22px; fill: var(--primary-dark); flex-shrink: 0; }
+.detail-grid .c .tx { flex: 1; }
+.detail-grid .c .k { font-size: 11px; color: var(--muted); }
+.detail-grid .c .v { font-size: 14px; font-weight: 700; color: var(--fg); font-family: var(--font-mono); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <button class="back" onclick="location.href='01-board.html'"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <div class="title-block"><div class="title">天气方位</div><div class="subtitle">现场风向 · 内攻参考</div></div>
+  <button class="action" aria-label="刷新天气数据" onclick="refreshWeather()"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+</div>
+
+<div class="scroll-area with-nav">
+
+<div class="wx-hero">
+  <div class="loc"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>朝阳区建国路 SOHO 现代城 · 现场</div>
+  <div class="main">
+    <div class="temp">28<span class="u">°C</span></div>
+    <div class="desc"><div class="ic">☀</div><div class="cond">多云</div><div class="range">最高 32° · 最低 21°</div></div>
+  </div>
+</div>
+
+<div class="wind-card">
+  <div class="hd"><div class="t">风向 · 风速</div><div class="tag">下风口已规避</div></div>
+  <div class="compass-row">
+    <div class="compass">
+      <svg viewBox="0 0 130 130">
+        <circle cx="65" cy="65" r="58" fill="none" stroke="#E6E6E6" stroke-width="2"/>
+        <circle cx="65" cy="65" r="48" fill="none" stroke="#F0F0F0" stroke-width="1" stroke-dasharray="2,4"/>
+        <text x="65" y="14" text-anchor="middle" font-size="11" fill="#D32F2F" font-weight="700">N</text>
+        <text x="65" y="124" text-anchor="middle" font-size="11" fill="#666">S</text>
+        <text x="120" y="69" text-anchor="middle" font-size="11" fill="#666">E</text>
+        <text x="10" y="69" text-anchor="middle" font-size="11" fill="#666">W</text>
+        <text x="65" y="69" text-anchor="middle" font-size="9" fill="#999" font-family="monospace">SW</text>
+        <text x="65" y="80" text-anchor="middle" font-size="9" fill="#999" font-family="monospace">218°</text>
+        <g transform="translate(65 65) rotate(218)">
+          <path d="M 0 -42 L 7 0 L 0 -10 L -7 0 Z" fill="#FF9800"/>
+          <circle cx="0" cy="0" r="5" fill="#E65100"/>
+        </g>
+      </svg>
+    </div>
+    <div class="wind-data">
+      <div class="row"><span class="k">风向</span><span class="v">西南 SW</span></div>
+      <div class="row"><span class="k">风速</span><span class="v">3.4 m/s</span></div>
+      <div class="row"><span class="k">风力</span><span class="v">3 级</span></div>
+      <div class="row"><span class="k">阵风</span><span class="v hot">5.8 m/s</span></div>
+      <div class="row"><span class="k">体感</span><span class="v">31 °C</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="tip-strip">
+  <div class="tt">内攻提示</div>
+  <div class="tx">下风口位于 <b>东北 NE</b> 方向，建议布防车辆停靠 <b>西南</b> 侧（上风口）。当前湿度低，注意复燃风险。</div>
+</div>
+
+<div class="trace-card" id="traceCard">
+  <div class="row">
+    <div>
+      <div class="t">下风口规避已确认</div>
+      <div class="s" id="traceText">指挥员刘洋 · 22:18 · 通过现场复核，审计 EVT-WX-2218。</div>
+    </div>
+    <button class="btn-mini" onclick="confirmWindTrace()">重新确认</button>
+  </div>
+</div>
+
+<div class="hourly">
+  <div class="ttl">逐时预报 · 接下来 6 小时</div>
+  <div class="scroll">
+    <div class="h now"><div class="ti">现在</div><div class="ic">☀</div><div class="te">28°</div><div class="wd">SW 3</div></div>
+    <div class="h"><div class="ti">23:00</div><div class="ic">☁</div><div class="te">27°</div><div class="wd">SW 3</div></div>
+    <div class="h"><div class="ti">00:00</div><div class="ic">☁</div><div class="te">26°</div><div class="wd">S 2</div></div>
+    <div class="h"><div class="ti">01:00</div><div class="ic">☁</div><div class="te">25°</div><div class="wd">S 2</div></div>
+    <div class="h"><div class="ti">02:00</div><div class="ic">🌧</div><div class="te">24°</div><div class="wd">SE 4</div></div>
+    <div class="h"><div class="ti">03:00</div><div class="ic">🌧</div><div class="te">23°</div><div class="wd">SE 4</div></div>
+    <div class="h"><div class="ti">04:00</div><div class="ic">🌧</div><div class="te">22°</div><div class="wd">E 3</div></div>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="c"><svg viewBox="0 0 24 24"><path d="M12 3.77L11.25 4.61C11.25 4.61 9.97 6.06 8.68 7.94C7.39 9.82 6 12.07 6 14.23A6 6 0 0 0 12 20.23A6 6 0 0 0 18 14.23C18 12.07 16.61 9.82 15.32 7.94C14.03 6.06 12.75 4.61 12.75 4.61L12 3.77Z"/></svg><div class="tx"><div class="k">湿度</div><div class="v">42 %</div></div></div>
+  <div class="c"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg><div class="tx"><div class="k">能见度</div><div class="v">8.2 km</div></div></div>
+  <div class="c"><svg viewBox="0 0 24 24"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z"/></svg><div class="tx"><div class="k">紫外线</div><div class="v">中等</div></div></div>
+  <div class="c"><svg viewBox="0 0 24 24"><path d="M12 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2m0 10c2.7 0 5.8 1.29 6 2H6c.23-.72 3.31-2 6-2m0-12C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><div class="tx"><div class="k">气压</div><div class="v">1013 hPa</div></div></div>
+</div>
+
+<div style="height:80px"></div>
+
+</div>
+
+<script src="_shared.js"></script>
+<script>
+injectChrome({nav:'weather'});
+function refreshWeather() {
+  showToast('天气已刷新 · 数据时间 22:22 · 来源：现场网关');
+}
+function confirmWindTrace() {
+  showBusinessConfirm({
+    title: '确认下风口规避',
+    message: '确认后会记录当前风向、确认人和时间，用于事后复盘现场布防决策。',
+    confirmText: '确认并记录',
+    details: [
+      { k: '风向', v: '西南 SW 218°，下风口东北 NE' },
+      { k: '确认人', v: '指挥员刘洋' },
+      { k: '审计', v: 'EVT-WX-' + new Date().getHours() + new Date().getMinutes() }
+    ],
+    onConfirm: () => {
+      document.getElementById('traceText').textContent = '指挥员刘洋 · 刚刚 · 已重新确认下风口规避，等待下一次天气刷新。';
+      showToast('下风口规避已记录');
+    }
+  });
+}
+</script>
+</body>
+</html>

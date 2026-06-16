@@ -1,0 +1,216 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>花名册 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.search-bar { padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border-soft); display: flex; gap: 8px; align-items: center; }
+.search-input { width: 100%; height: 38px; background: var(--bg); border-radius: var(--r-pill); padding: 0 14px 0 38px; border: none; font-size: 14px; font-family: inherit; color: var(--fg); }
+.search-wrap { position: relative; flex: 1; }
+.search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; fill: var(--muted); }
+.filter-chip { display: flex; gap: 6px; padding: 8px 16px 4px; overflow-x: auto; }
+.filter-chip::-webkit-scrollbar { display: none; }
+.filter-chip .chip { flex-shrink: 0; padding: 5px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-pill); font-size: 12px; color: var(--fg-2); cursor: pointer; font-family: inherit; min-height: 34px; }
+.filter-chip .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+.idx-bar { padding: 8px 16px 4px; font-size: 11px; color: var(--muted); font-weight: 600; background: var(--bg); }
+.roster-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border-soft); }
+.roster-item .avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--primary-tint); color: var(--primary-dark); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; flex-shrink: 0; }
+.roster-item .avatar.busy { background: var(--danger); color: #fff; }
+.roster-item .avatar.exit { background: var(--success-bg); color: var(--success); }
+.roster-item .info { flex: 1; min-width: 0; }
+.roster-item .info .top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.roster-item .info .name { font-size: 15px; font-weight: 600; color: var(--fg); }
+.roster-item .info .bottom { display: flex; gap: 8px; font-size: 11px; color: var(--muted); margin-top: 3px; font-family: var(--font-mono); }
+.roster-item .right-meta { text-align: right; font-size: 10px; color: var(--muted); }
+.roster-item .right-meta .big { font-size: 14px; font-weight: 600; color: var(--fg-2); font-family: var(--font-mono); }
+.summary { background: var(--surface); padding: 14px 16px; display: flex; justify-content: space-around; border-bottom: 1px solid var(--border-soft); }
+.summary .item { text-align: center; }
+.summary .num { font-size: 20px; font-weight: 700; font-family: var(--font-mono); color: var(--primary-dark); }
+.summary .lab { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.fab-add { position: fixed; right: 16px; bottom: 64px; height: 44px; padding: 0 18px; border-radius: var(--r-pill); background: var(--primary); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(255,152,0,0.4); display: flex; align-items: center; gap: 6px; font-weight: 600; z-index: 90; font-family: inherit; }
+.fab-add svg { width: 18px; height: 18px; fill: #fff; }
+
+/* 管理员模式横幅 */
+.admin-banner { background: linear-gradient(90deg, #FFF3E0 0%, #FFE0B2 100%); padding: 8px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--primary-dark); border-bottom: 1px solid var(--primary-light); }
+.admin-banner .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+.admin-banner b { font-weight: 700; }
+.admin-banner .hint { color: var(--muted); margin-left: auto; }
+.roster-item.editable .right-meta { cursor: pointer; }
+.roster-item.editable .right-meta .big { color: var(--primary-dark); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+.edit-pen { display: inline-block; margin-left: 4px; opacity: 0.6; }
+
+/* 编辑弹窗 */
+.edit-numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
+.edit-numpad button { height: 44px; background: var(--bg); border: none; border-radius: var(--r-md); font-size: 18px; font-weight: 600; font-family: var(--font-mono); cursor: pointer; }
+.edit-numpad button:active { background: var(--primary-tint); }
+.edit-numpad button.action { background: var(--primary); color: #fff; }
+.audit-banner { background: #FFF8E1; border: 1px solid #FFE082; padding: 8px 10px; border-radius: var(--r-sm); font-size: 11px; color: #795B00; margin-top: 10px; }
+.result-status { padding: 8px 16px; font-size: 12px; color: var(--muted); background: var(--bg); }
+.roster-empty { display: none; margin: 14px 16px; padding: 22px 16px; border: 1px dashed var(--border); border-radius: var(--r-md); text-align: center; color: var(--muted); background: var(--surface); }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <button class="back" onclick="location.href='01-board.html'"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <div class="title-block"><div class="title">花名册</div><div class="subtitle">12 名消防员 · 5 内攻中</div></div>
+  <button class="action"><svg viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg></button>
+</div>
+
+<div class="scroll-area with-nav">
+  <div class="admin-banner">
+    <span class="dot"></span>
+    <span>管理员模式 · <b>张伟</b></span>
+    <span class="hint">仅可编辑「用尽时间」</span>
+  </div>
+  <div class="search-bar">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input class="search-input" id="rosterSearch" placeholder="按姓名或编号搜索" aria-label="按姓名或编号搜索">
+    </div>
+  </div>
+
+  <div class="filter-chip">
+    <button class="chip active" data-filter="all">全部 12</button>
+    <button class="chip" data-filter="busy">内攻中 5</button>
+    <button class="chip" data-filter="exit">已出场 3</button>
+    <button class="chip" data-filter="standby">待命 4</button>
+    <button class="chip" data-filter="commander">指挥员</button>
+    <button class="chip" data-filter="fighter">战斗员</button>
+  </div>
+  <div class="result-status" id="resultStatus" role="status">显示全部人员 · 12 条</div>
+
+  <div class="summary">
+    <div class="item"><div class="num">12</div><div class="lab">在编</div></div>
+    <div class="item"><div class="num" style="color:var(--danger)">5</div><div class="lab">内攻中</div></div>
+    <div class="item"><div class="num" style="color:var(--success)">3</div><div class="lab">已出场</div></div>
+    <div class="item"><div class="num" style="color:var(--info)">4</div><div class="lab">待命</div></div>
+  </div>
+
+  <div class="idx-bar">T</div>
+  <div class="roster-item" tabindex="0" data-name="唐明 001 指挥员 A型" data-status="busy" data-role="commander">
+    <div class="avatar busy">特</div>
+    <div class="info">
+      <div class="top"><span class="name">唐明</span><span class="pill pill-danger">低气量</span></div>
+      <div class="bottom"><span>001</span><span>指挥员</span><span>A型</span><span>28岁</span></div>
+    </div>
+    <div class="right-meta"><div class="big">38.0</div><div>用尽 min</div></div>
+  </div>
+
+  <div class="idx-bar">W</div>
+  <div class="roster-item" tabindex="0" data-name="王五 003 战斗员 B型" data-status="busy" data-role="fighter">
+    <div class="avatar busy">王</div>
+    <div class="info">
+      <div class="top"><span class="name">王五</span><span class="pill pill-warn">内攻中</span></div>
+      <div class="bottom"><span>003</span><span>战斗员</span><span>B型</span><span>26岁</span></div>
+    </div>
+    <div class="right-meta"><div class="big">38.0</div><div>用尽 min</div></div>
+  </div>
+  <div class="roster-item" tabindex="0" data-name="吴磊 011 战斗员 A型" data-status="standby" data-role="fighter">
+    <div class="avatar">吴</div>
+    <div class="info">
+      <div class="top"><span class="name">吴磊</span><span class="pill pill-info">待命</span></div>
+      <div class="bottom"><span>011</span><span>战斗员</span><span>A型</span><span>25岁</span></div>
+    </div>
+    <div class="right-meta"><div class="big">36.5</div><div>用尽 min</div></div>
+  </div>
+
+  <div class="idx-bar">L</div>
+  <div class="roster-item" tabindex="0" data-name="李建国 004 战斗员 O型" data-status="busy" data-role="fighter">
+    <div class="avatar busy">李</div>
+    <div class="info">
+      <div class="top"><span class="name">李建国</span><span class="pill pill-warn">内攻中</span></div>
+      <div class="bottom"><span>004</span><span>战斗员</span><span>O型</span><span>31岁</span></div>
+    </div>
+    <div class="right-meta"><div class="big">40.0</div><div>用尽 min</div></div>
+  </div>
+  <div class="roster-item" tabindex="0" data-name="林峰 007 战斗员 B型" data-status="exit" data-role="fighter">
+    <div class="avatar exit">林</div>
+    <div class="info">
+      <div class="top"><span class="name">林峰</span><span class="pill pill-success">已出场</span></div>
+      <div class="bottom"><span>007</span><span>战斗员</span><span>B型</span><span>27岁</span></div>
+    </div>
+    <div class="right-meta"><div class="big">37.5</div><div>用尽 min</div></div>
+  </div>
+
+  <div class="idx-bar">Z</div>
+  <div class="roster-item" tabindex="0" data-name="张明 006 战斗员 AB型" data-status="busy" data-role="fighter">
+    <div class="avatar busy">张</div>
+    <div class="info">
+      <div class="top"><span class="name">张明</span><span class="pill pill-warn">内攻中</span></div>
+      <div class="bottom"><span>006</span><span>战斗员</span><span>AB型</span><span>24岁</span></div>
+    </div>
+    <div class="right-meta"><div class="big">36.0</div><div>用尽 min</div></div>
+  </div>
+  <div class="roster-item" tabindex="0" data-name="赵磊 008 战斗员 O型" data-status="busy" data-role="fighter">
+    <div class="avatar busy">赵</div>
+    <div class="info">
+      <div class="top"><span class="name">赵磊</span><span class="pill pill-warn">内攻中</span></div>
+      <div class="bottom"><span>008</span><span>战斗员</span><span>O型</span><span>29岁</span></div>
+    </div>
+    <div class="right-meta"><div class="big">39.0</div><div>用尽 min</div></div>
+  </div>
+  <div class="roster-item" tabindex="0" data-name="周浩 009 战斗员 A型" data-status="exit" data-role="fighter">
+    <div class="avatar exit">周</div>
+    <div class="info">
+      <div class="top"><span class="name">周浩</span><span class="pill pill-success">已出场</span></div>
+      <div class="bottom"><span>009</span><span>战斗员</span><span>A型</span><span>32岁</span></div>
+    </div>
+    <div class="right-meta"><div class="big">38.5</div><div>用尽 min</div></div>
+  </div>
+
+  <div class="roster-empty" id="rosterEmpty">没有匹配人员，请调整搜索词或筛选条件。</div>
+  <div style="padding:30px 16px 100px;text-align:center;color:var(--meta);font-size:11px">— 共 12 条 —</div>
+</div>
+
+<button class="fab-add" onclick="location.href='02a-add-officer.html'">
+  <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+  创建安全员
+</button>
+
+<script src="_shared.js"></script>
+<script>
+injectChrome({nav:'roster'});
+let rosterFilter = 'all';
+const rosterSearch = document.getElementById('rosterSearch');
+const resultStatus = document.getElementById('resultStatus');
+const rosterEmpty = document.getElementById('rosterEmpty');
+
+function applyRosterFilter() {
+  const q = rosterSearch.value.trim().toLowerCase();
+  let visible = 0;
+  document.querySelectorAll('.roster-item').forEach(item => {
+    const matchesText = !q || item.dataset.name.toLowerCase().includes(q);
+    const matchesFilter = rosterFilter === 'all' || item.dataset.status === rosterFilter || item.dataset.role === rosterFilter;
+    const show = matchesText && matchesFilter;
+    item.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  resultStatus.textContent = `${q ? '搜索：' + rosterSearch.value + ' · ' : ''}${document.querySelector('.filter-chip .active').textContent} · ${visible} 条`;
+  rosterEmpty.style.display = visible ? 'none' : 'block';
+}
+
+document.querySelectorAll('.filter-chip .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.filter-chip .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    rosterFilter = chip.dataset.filter;
+    applyRosterFilter();
+  });
+});
+rosterSearch.addEventListener('input', applyRosterFilter);
+document.querySelectorAll('.roster-item').forEach(item => {
+  item.addEventListener('click', () => showToast(`${item.querySelector('.name').textContent} · 已打开人员摘要入口`));
+  item.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      item.click();
+    }
+  });
+});
+applyRosterFilter();
+</script>
+</body>
+</html>

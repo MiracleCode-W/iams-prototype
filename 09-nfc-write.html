@@ -1,0 +1,196 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NFC 制卡 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.step-bar { display: flex; align-items: center; padding: 14px 16px; background: var(--surface); border-bottom: 1px solid var(--border-soft); }
+.step-bar .stp { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; position: relative; }
+.step-bar .stp .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--border); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); }
+.step-bar .stp.done .dot { background: var(--success); }
+.step-bar .stp.active .dot { background: var(--primary); box-shadow: 0 0 0 4px var(--primary-tint); }
+.step-bar .stp .lb { font-size: 11px; color: var(--muted); }
+.step-bar .stp.active .lb { color: var(--primary-dark); font-weight: 700; }
+.step-bar .stp.done .lb { color: var(--success); }
+.step-bar .sep { flex: 0 0 30px; height: 2px; background: var(--border); margin: 0 -4px; align-self: flex-start; margin-top: 14px; }
+.step-bar .sep.done { background: var(--success); }
+.section { background: var(--surface); margin-bottom: 10px; }
+.section .ttl { padding: 12px 16px 8px; font-size: 12px; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; }
+.form-row { padding: 0 16px; }
+.form-row .fld { padding: 10px 0; border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; gap: 12px; }
+.form-row .fld:last-child { border-bottom: none; }
+.form-row .fld .lb { width: 80px; font-size: 13px; color: var(--muted); flex-shrink: 0; }
+.form-row .fld input, .form-row .fld select { flex: 1; border: none; background: none; font-size: 15px; color: var(--fg); font-family: inherit; font-weight: 500; outline: none; min-width: 0; }
+.form-row .fld input.mono { font-family: var(--font-mono); }
+.role-tabs { display: flex; gap: 6px; flex: 1; }
+.role-tabs .rt { flex: 1; padding: 7px 0; text-align: center; border: 1px solid var(--border); border-radius: var(--r-sm); font-size: 12px; color: var(--fg-2); cursor: pointer; background: var(--surface); }
+.role-tabs .rt.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+.blood-row { display: flex; gap: 6px; flex: 1; }
+.blood-row .b { width: 38px; height: 32px; border: 1px solid var(--border); border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; font-family: var(--font-mono); color: var(--fg-2); cursor: pointer; background: var(--surface); }
+.blood-row .b.active { background: var(--danger); border-color: var(--danger); color: #fff; }
+.preview-card { background: var(--fg); color: #fff; margin: 0 16px 10px; border-radius: var(--r-md); padding: 14px; }
+.preview-card .lb { font-size: 10px; color: var(--accent); font-weight: 700; letter-spacing: 1px; }
+.preview-card .raw { font-family: var(--font-mono); font-size: 13px; margin-top: 6px; line-height: 1.5; word-break: break-all; }
+.preview-card .raw b { color: var(--accent); }
+.preview-card .size-row { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 11px; font-family: var(--font-mono); color: rgba(255,255,255,0.6); }
+.nfc-zone { background: var(--surface); margin: 0 0 10px; padding: 24px 16px; text-align: center; }
+.nfc-zone .ring { width: 90px; height: 90px; border-radius: 50%; background: var(--primary-tint); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; animation: nfc-p 1.5s infinite; }
+@keyframes nfc-p { 0%,100% { box-shadow: 0 0 0 0 rgba(255,152,0,0.4); } 50% { box-shadow: 0 0 0 20px rgba(255,152,0,0); } }
+.nfc-zone .ring svg { width: 48px; height: 48px; fill: var(--primary); }
+.nfc-zone .hint { font-size: 15px; font-weight: 700; color: var(--fg); }
+.nfc-zone .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.bottom-bar { position: fixed; bottom: 56px; left: 0; right: 0; padding: 10px 16px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; z-index: 89; }
+.trust-card { background: var(--surface); margin: 0 16px 10px; border-radius: var(--r-md); border: 1px solid var(--border-soft); overflow: hidden; }
+.trust-card .th { padding: 10px 12px; background: var(--surface-2); font-size: 12px; color: var(--fg); font-weight: 700; border-bottom: 1px solid var(--border-soft); }
+.trust-card .rule { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border-soft); }
+.trust-card .rule:last-child { border-bottom: none; }
+.trust-card .rule .ok { width: 22px; height: 22px; border-radius: 50%; background: var(--success-bg); color: var(--success); display:flex; align-items:center; justify-content:center; font-size: 13px; font-weight: 800; flex-shrink: 0; }
+.trust-card .rule .warn { background: #FFF8E1; color: #795B00; }
+.trust-card .rule .txt { flex: 1; min-width: 0; }
+.trust-card .rule .txt b { display:block; font-size: 12px; color: var(--fg); }
+.trust-card .rule .txt span { display:block; font-size: 10px; color: var(--muted); margin-top: 2px; font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trust-summary { background: var(--surface); margin: 0 16px 10px; border-radius: var(--r-md); border: 1px solid var(--border-soft); padding: 12px; }
+.trust-summary .okline { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: var(--success); }
+.trust-summary .okline span { width: 22px; height: 22px; border-radius: 50%; background: var(--success-bg); display: inline-flex; align-items: center; justify-content: center; }
+.trust-summary p { margin-top: 6px; color: var(--fg-2); font-size: 12px; line-height: 1.45; }
+.tech-details { margin-top: 8px; font-size: 11px; color: var(--muted); }
+.tech-details summary { cursor: pointer; color: var(--primary-dark); font-weight: 700; }
+.tech-details code { font-family: var(--font-mono); color: var(--fg); }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <button class="back" onclick="location.href='02-roster.html'"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <div class="title-block"><div class="title">NFC 制卡</div><div class="subtitle">写入人员身份卡</div></div>
+  <button class="action" aria-label="查看制卡说明"><svg viewBox="0 0 24 24"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg></button>
+</div>
+
+<div class="scroll-area with-nav" style="bottom:112px">
+  <div class="step-bar">
+    <div class="stp done"><div class="dot">✓</div><div class="lb">选择</div></div>
+    <div class="sep done"></div>
+    <div class="stp active"><div class="dot">2</div><div class="lb">填写</div></div>
+    <div class="sep"></div>
+    <div class="stp"><div class="dot">3</div><div class="lb">贴卡</div></div>
+    <div class="sep"></div>
+    <div class="stp"><div class="dot">4</div><div class="lb">完成</div></div>
+  </div>
+
+  <div class="section">
+    <div class="ttl">人员信息</div>
+    <div class="form-row">
+      <div class="fld"><span class="lb">姓名</span><input type="text" value="王五"></div>
+      <div class="fld"><span class="lb">编号</span><input type="text" class="mono" value="003"></div>
+      <div class="fld"><span class="lb">年龄</span><input type="text" class="mono" value="26"></div>
+      <div class="fld"><span class="lb">血型</span>
+        <div class="blood-row">
+          <div class="b">A</div>
+          <div class="b active">B</div>
+          <div class="b">AB</div>
+          <div class="b">O</div>
+        </div>
+      </div>
+      <div class="fld"><span class="lb">职务</span>
+        <div class="role-tabs">
+          <div class="rt">指挥员</div>
+          <div class="rt active">战斗员</div>
+          <div class="rt">驾驶员</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="ttl">气瓶 · 装备</div>
+    <div class="form-row">
+      <div class="fld"><span class="lb">气瓶规格</span><input type="text" class="mono" value="6.8 L · 30 MPa"></div>
+      <div class="fld"><span class="lb">用尽时间</span><input type="text" class="mono" value="38.0 min"></div>
+      <div class="fld"><span class="lb">NFC UID</span><input type="text" class="mono" value="04:A3:B2:C1:D5:E7:F9" disabled style="color:var(--muted)"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="ttl">现场校验结果</div>
+    <div class="form-row">
+      <div class="fld"><span class="lb">卡片归属</span><input type="text" value="这张卡属于王五本人" readonly></div>
+      <div class="fld"><span class="lb">站点范围</span><input type="text" value="仅可在朝阳三站使用" readonly></div>
+      <div class="fld"><span class="lb">内容状态</span><input type="text" value="标签内容未被篡改" readonly></div>
+      <div class="fld"><span class="lb">失败处理</span><input type="text" value="不通过时只能手动降级" readonly></div>
+    </div>
+  </div>
+
+  <div class="section" style="padding-bottom:4px">
+    <div class="ttl">NDEF 预览</div>
+    <div class="preview-card">
+      <div class="lb">TEXT/UTF-8</div>
+      <div class="raw">v1<b>|</b>FS-BJ-CY-003<b>|</b>003<b>|</b>王五,B,26,战斗员,38.0<b>|</b>A94C-7F2B</div>
+      <div class="size-row"><span>58 字节 / 137 max</span><span>NTAG213 · NDEF</span></div>
+    </div>
+  </div>
+
+  <div class="trust-card">
+    <div class="th">写入前可信规则</div>
+    <div class="rule"><div class="ok">✓</div><div class="txt"><b>这张卡只绑定王五一人</b><span>换卡需管理员先解除旧卡绑定</span></div></div>
+    <div class="rule"><div class="ok">✓</div><div class="txt"><b>这张卡只允许本站使用</b><span>跨站标签不能直接进出场</span></div></div>
+    <div class="rule"><div class="ok warn">!</div><div class="txt"><b>校验失败不允许自动进场</b><span>必须走手动降级，并保留原因</span></div></div>
+  </div>
+
+  <div class="trust-summary">
+    <div class="okline"><span>✓</span>可以写入</div>
+    <p>系统已确认人员、站点和卡片为空白状态；写入后，安全员扫码时会看到“属于本站、属于本人、未被篡改”。</p>
+    <details class="tech-details">
+      <summary>展开技术详情</summary>
+      <div>schemaVersion <code>v1</code> · stationId <code>FS-BJ-CY-003</code> · UID <code>04:A3:B2:C1:D5:E7:F9</code> · checksum <code>A94C-7F2B</code></div>
+    </details>
+  </div>
+
+  <div class="nfc-zone">
+    <div class="ring"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-4 16H8c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2h2v2H8v8h8v-2h-2v-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2zm-1-7v2h-2v-2h2zm-5 0H8V9h2v2z"/></svg></div>
+    <div class="hint">将 NFC 卡贴近手机背面</div>
+    <div class="sub">检测到卡片后自动写入 · 请勿移动</div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <button class="btn btn-secondary" style="flex:1" onclick="location.href='02-roster.html'">取消</button>
+  <button class="btn btn-primary" style="flex:2" onclick="confirmWriteNfc()">写入 NFC</button>
+</div>
+
+<script src="_shared.js"></script>
+<script>
+injectChrome({nav:'roster'});
+document.querySelectorAll('.role-tabs .rt').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.role-tabs .rt').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+  });
+});
+document.querySelectorAll('.blood-row .b').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.blood-row .b').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+  });
+});
+function confirmWriteNfc() {
+  showBusinessConfirm({
+    title: '写入并绑定 NFC',
+    message: '写入成功后，这张卡将绑定王五本人，只能在本站通过校验后使用；技术校验值会同时写入审计日志。',
+    irreversible: '不可撤销：换卡必须由管理员解除旧卡绑定，不能直接覆盖。',
+    confirmText: '确认写入',
+    details: [
+      { k: '人员', v: '王五 · 编号 003' },
+      { k: '现场判断', v: '属于本站 · 属于本人 · 标签未被篡改' },
+      { k: '技术详情', v: 'UID 04:A3…F9 · checksum A94C-7F2B' }
+    ],
+    onConfirm: () => {
+      showToast('NFC 写入成功 · UID 已绑定');
+      setTimeout(() => { location.href = '02-roster.html'; }, 800);
+    }
+  });
+}
+</script>
+</body>
+</html>

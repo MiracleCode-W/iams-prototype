@@ -1,0 +1,317 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>登录 · 消防内攻管理</title>
+  <link rel="stylesheet" href="_shared.css">
+  <style>
+    body { padding-bottom: 50px; }
+    .login-hero {
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+      padding: 76px 28px 80px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .login-hero::after {
+      content: ''; position: absolute; right: -60px; top: -60px;
+      width: 220px; height: 220px;
+      background: rgba(255,255,255,0.08); border-radius: 50%;
+    }
+    .login-hero::before {
+      content: ''; position: absolute; left: -40px; bottom: -100px;
+      width: 180px; height: 180px;
+      background: rgba(0,0,0,0.08); border-radius: 50%;
+    }
+    .brand-mark {
+      width: 56px; height: 56px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      position: relative; z-index: 1;
+    }
+    .brand-mark svg { width: 32px; height: 32px; fill: #fff; }
+    .login-hero h1 {
+      font-size: 26px; font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      position: relative; z-index: 1;
+    }
+    .login-hero .sub {
+      font-size: 13px;
+      opacity: 0.85;
+      position: relative; z-index: 1;
+      font-family: var(--font-mono);
+    }
+    .login-form {
+      margin: -50px 20px 0;
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      padding: 24px 20px 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      position: relative; z-index: 2;
+    }
+    .station-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--primary-tint); color: var(--primary-dark);
+      padding: 6px 10px; border-radius: var(--r-pill);
+      font-size: 12px; font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .station-chip svg { width: 14px; height: 14px; fill: currentColor; }
+    .pin-row {
+      display: flex; gap: 8px; margin-top: 8px;
+    }
+    .pin-row .dot {
+      flex: 1; height: 44px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 600;
+      background: var(--surface);
+    }
+    .pin-row .dot.filled { border-color: var(--primary); background: var(--primary-tint); color: var(--primary-dark); }
+    .pin-real {
+      width: 100%;
+      height: 48px;
+      margin-top: 10px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      font-family: var(--font-mono);
+      font-size: 18px;
+      letter-spacing: 0.28em;
+      text-align: center;
+    }
+    .pin-status {
+      min-height: 18px;
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .pin-status.error { color: var(--danger); font-weight: 600; }
+    .remember-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 18px 0;
+      font-size: 13px;
+    }
+    .checkbox {
+      display: flex; align-items: center; gap: 6px; color: var(--fg-2);
+      cursor: pointer;
+    }
+    .checkbox .box {
+      width: 18px; height: 18px; border: 1.5px solid var(--primary);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--primary);
+    }
+    .checkbox .box svg { width: 14px; height: 14px; fill: #fff; }
+    .role-strip {
+      margin: 24px 20px 0;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: rgba(255,255,255,0.6);
+      border-radius: var(--r-md);
+      padding: 12px;
+    }
+    .role-strip .item { text-align: center; padding: 8px; }
+    .role-strip .num { font-size: 22px; font-weight: 700; color: var(--primary-dark); font-family: var(--font-mono); }
+    .role-strip .lab { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .foot {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      padding: 10px 20px;
+      text-align: center; font-size: 11px; color: var(--meta);
+      font-family: var(--font-mono);
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      z-index: 5;
+    }
+    .login-mode {
+      flex: 1; height: 36px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--surface);
+      font-size: 14px; font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .login-mode.active {
+      border-color: var(--primary);
+      background: var(--primary-tint);
+      color: var(--primary-dark);
+    }
+    .hint-text {
+      font-size: 11px; color: var(--muted);
+      background: var(--primary-tint);
+      border-radius: var(--r-sm);
+      padding: 8px 10px;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+    .security-note {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: var(--r-sm);
+      background: var(--surface-2);
+      border: 1px solid var(--border-soft);
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .security-note b { color: var(--fg-2); }
+  </style>
+</head>
+<body>
+
+<div class="login-hero">
+  <div class="brand-mark">
+    <svg viewBox="0 0 24 24"><path d="M19.48 12.35c-1.57-4.08-7.16-4.3-5.81-10.23.1-.44-.37-.78-.75-.55C9.29 3.71 6.68 8 8.87 13.62c.18.46-.36.89-.75.59-1.81-1.37-2-3.34-1.84-4.75.06-.52-.62-.77-.91-.34C4.69 10.16 4 11.84 4 14.37c.38 5.6 5.11 7.32 6.81 7.54 2.43.31 5.06-.14 6.95-1.87 2.08-1.93 2.84-5.01 1.72-7.69zm-7.43 6.6c1.44-.35 2.18-1.39 2.38-2.31.33-1.43-.96-2.83-.09-5.09.33 1.87 3.27 3.04 3.27 5.08.08 2.53-2.66 4.7-5.56 2.32z"/></svg>
+  </div>
+  <h1>消防内攻管理</h1>
+  <div class="sub">FIREFIGHTER · INTERIOR ATTACK</div>
+</div>
+
+<div class="login-form">
+  <span class="station-chip">
+    <svg viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8z"/></svg>
+    朝阳区第三消防站
+  </span>
+
+  <div class="field">
+    <label>账号类型</label>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="login-mode active" data-mode="admin" onclick="switchMode('admin')">管理员</button>
+      <button class="login-mode" data-mode="officer" onclick="switchMode('officer')">安全员</button>
+    </div>
+  </div>
+
+  <div id="adminFields">
+    <div class="field">
+      <label>管理员账号</label>
+      <input type="text" id="adminId" value="admin" style="font-family:var(--font-mono)">
+    </div>
+    <div class="field">
+      <label>管理员 PIN 码（6 位）</label>
+      <div class="pin-row">
+        <div class="dot filled">•</div>
+        <div class="dot filled">•</div>
+        <div class="dot filled">•</div>
+        <div class="dot filled">•</div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <input class="pin-real" id="adminPin" type="hidden" inputmode="numeric" maxlength="6" value="123456" aria-label="管理员 6 位 PIN 码">
+      <div class="pin-status" id="adminPinStatus">已输入 4/6 位；可继续输入或删除。</div>
+    </div>
+    <div class="hint-text">管理员首次登录后将进入初始化流程，创建消防站和首个安全员</div>
+  </div>
+
+  <div id="officerFields" style="display:none">
+    <div class="field">
+      <label>消防站 ID</label>
+      <input type="text" value="FS-BJ-CY-003" readonly style="background:var(--surface-2);color:var(--muted);font-family:var(--font-mono)">
+    </div>
+    <div class="field">
+      <label>安全员 PIN 码（6 位）</label>
+      <div class="pin-row">
+        <div class="dot filled">•</div>
+        <div class="dot filled">•</div>
+        <div class="dot filled">•</div>
+        <div class="dot filled">•</div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <input class="pin-real" id="officerPin" type="password" inputmode="numeric" maxlength="6" value="246810" aria-label="安全员 6 位 PIN 码">
+      <div class="pin-status" id="officerPinStatus">已输入 4/6 位；连续错误将触发锁定。</div>
+    </div>
+  </div>
+
+  <div class="remember-row">
+    <label class="checkbox">
+      <span class="box"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+      记住密码
+    </label>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="switchStation()">切换消防站</button>
+  </div>
+
+  <button class="btn btn-primary btn-block" id="loginBtn" onclick="doLogin()">登 录</button>
+  <div class="security-note"><b>登录保护：</b>PIN 连续输错 5 次后锁定账号 5 分钟；应用进入后台超过 10 分钟后需重新验证。</div>
+</div>
+
+<div class="role-strip">
+  <div class="item">
+    <div class="num">12</div>
+    <div class="lab">在编消防员</div>
+  </div>
+  <div class="item">
+    <div class="num">3</div>
+    <div class="lab">在线安全员设备</div>
+  </div>
+</div>
+
+<div class="foot">
+  局域网模式 · 192.168.1.18 → 主机 .12
+</div>
+
+<script src="_shared.js"></script>
+<script>injectChrome({nav:false});</script>
+<script>
+  let mode = 'admin';
+  function switchMode(m) {
+    mode = m;
+    document.querySelectorAll('.login-mode').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+    document.getElementById('adminFields').style.display = m === 'admin' ? '' : 'none';
+    document.getElementById('officerFields').style.display = m === 'officer' ? '' : 'none';
+  }
+  function updatePinDots(input) {
+    const field = input.closest('.field');
+    const dots = field.querySelectorAll('.pin-row .dot');
+    const value = input.value.replace(/\D/g, '').slice(0, 6);
+    input.value = value;
+    dots.forEach((dot, index) => {
+      dot.classList.toggle('filled', index < value.length);
+      dot.textContent = index < value.length ? '•' : '';
+    });
+    const status = field.querySelector('.pin-status');
+    status.classList.remove('error');
+    status.textContent = value.length === 6 ? 'PIN 已满 6 位，可登录。' : `已输入 ${value.length}/6 位；可继续输入或删除。`;
+  }
+  document.querySelectorAll('.pin-real').forEach(input => {
+    input.addEventListener('input', () => updatePinDots(input));
+    updatePinDots(input);
+  });
+  function switchStation() {
+    showBusinessConfirm({
+      title: '切换消防站',
+      message: '切换前会退出当前站点会话，未同步的审计与出入场记录必须先上传到主机。',
+      details: [
+        { k: '当前站点', v: '朝阳区第三消防站 · FS-BJ-CY-003' },
+        { k: '同步状态', v: '主机在线，0 条未上传' }
+      ],
+      confirmText: '进入站点选择',
+      onConfirm: () => showToast('已进入站点选择流程 · 原型中保留当前站点')
+    });
+  }
+  function doLogin() {
+    const input = mode === 'admin' ? document.getElementById('adminPin') : document.getElementById('officerPin');
+    const status = mode === 'admin' ? document.getElementById('adminPinStatus') : document.getElementById('officerPinStatus');
+    if (input.value.length !== 6) {
+      status.classList.add('error');
+      status.textContent = '请输入完整 6 位 PIN；连续错误 5 次会锁定账号 5 分钟。';
+      input.focus();
+      return;
+    }
+    if (mode === 'admin') {
+      location.href = '00a-init.html';
+    } else {
+      location.href = '01-board.html';
+    }
+  }
+</script>
+</body>
+</html>

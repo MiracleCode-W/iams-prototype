@@ -1,0 +1,395 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>创建安全员 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.form-scroll { padding: 16px 16px 100px; }
+
+.section-card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 14px;
+}
+.section-card .sec-title {
+  font-size: 13px; font-weight: 600; color: var(--primary-dark);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 6px;
+}
+.section-card .sec-title svg { width: 16px; height: 16px; fill: var(--primary); }
+
+.field-row { display: flex; gap: 10px; }
+.field-row .field { flex: 1; }
+
+.blood-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  margin-top: 4px;
+}
+.blood-opt {
+  height: 40px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface);
+  font-family: var(--font-mono);
+}
+.blood-opt:active { background: var(--bg); }
+.blood-opt.selected {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+}
+
+.role-chips {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 4px;
+}
+.role-chip {
+  height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-pill);
+  display: flex; align-items: center; gap: 5px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface);
+  font-family: inherit;
+}
+.role-chip:active { background: var(--bg); }
+.role-chip.selected {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+.role-chip .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+}
+.role-chip.selected .dot { background: var(--primary); }
+
+.nfc-section {
+  background: var(--primary-tint);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  margin-top: 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.nfc-section .nfc-icon {
+  width: 40px; height: 40px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.nfc-section .nfc-icon svg { width: 20px; height: 20px; fill: #fff; }
+.nfc-section .nfc-text { flex: 1; }
+.nfc-section .nfc-text .t { font-size: 13px; font-weight: 600; color: var(--fg); }
+.nfc-section .nfc-text .d { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.nfc-section .nfc-switch {
+  position: relative; width: 44px; height: 24px;
+  background: var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.nfc-section .nfc-switch.on { background: var(--primary); }
+.nfc-section .nfc-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 20px; height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.nfc-section .nfc-switch.on::after { transform: translateX(20px); }
+
+.ndef-preview {
+  background: var(--fg);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #4CAF50;
+  line-height: 1.6;
+  word-break: break-all;
+}
+.ndef-preview .label { color: var(--muted); font-size: 10px; }
+.permission-note {
+  background: var(--info-bg);
+  border: 1px solid #BBDEFB;
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  color: #0D47A1;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.field-error {
+  display: none;
+  margin-top: 6px;
+  color: var(--danger);
+  font-size: 11px;
+  font-weight: 700;
+}
+.field.invalid input { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-bg); }
+.field.invalid .field-error { display: block; }
+.validation-panel {
+  display: none;
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--danger-bg);
+  color: #7F1D1D;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.validation-panel.show { display: block; }
+
+.sticky-bottom {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border-soft);
+  display: flex; gap: 10px;
+  z-index: 95;
+}
+.sticky-bottom .btn { flex: 1; }
+
+.toast {
+  position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
+  background: var(--success);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: var(--r-pill);
+  font-size: 14px; font-weight: 600;
+  box-shadow: 0 4px 16px rgba(46,125,50,0.35);
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <button class="back" onclick="location.href='02-roster.html'"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <div class="title-block"><div class="title">创建安全员</div><div class="subtitle">新增消防站人员</div></div>
+</div>
+
+<div class="scroll-area with-nav">
+  <div class="form-scroll">
+    <div class="permission-note"><b>管理员模式：</b>张伟可创建人员和绑定 NFC；安全员视角只能查看花名册，不能新增账号。</div>
+
+    <div class="section-card">
+      <div class="sec-title">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        基本信息
+      </div>
+      <div class="field">
+        <label>姓名 *</label>
+        <input type="text" id="name" placeholder="输入真实姓名" maxlength="10">
+        <div class="field-error">请输入真实姓名。</div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>年龄</label>
+          <input type="number" id="age" placeholder="如 28" min="18" max="60">
+          <div class="field-error">年龄需在 18-60 岁之间。</div>
+        </div>
+        <div class="field">
+          <label>编号 *</label>
+          <input type="text" id="code" placeholder="如 013" maxlength="4">
+          <div class="field-error">编号不能为空，且不能与现有人员重复。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="sec-title">
+        <svg viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8z"/></svg>
+        角色与职责
+      </div>
+      <div class="field">
+        <label>角色 *</label>
+        <div class="role-chips" id="roleChips">
+          <div class="role-chip selected" data-role="安全官" onclick="pickRole(this)">
+            <span class="dot"></span>安全官
+          </div>
+          <div class="role-chip" data-role="指挥员" onclick="pickRole(this)">
+            <span class="dot"></span>指挥员
+          </div>
+          <div class="role-chip" data-role="战斗员" onclick="pickRole(this)">
+            <span class="dot"></span>战斗员
+          </div>
+          <div class="role-chip" data-role="驾驶员" onclick="pickRole(this)">
+            <span class="dot"></span>驾驶员
+          </div>
+          <div class="role-chip" data-role="通讯员" onclick="pickRole(this)">
+            <span class="dot"></span>通讯员
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="sec-title">
+        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        血型
+      </div>
+      <div class="blood-grid" id="bloodGrid">
+        <div class="blood-opt" data-type="A" onclick="pickBlood(this)">A</div>
+        <div class="blood-opt" data-type="B" onclick="pickBlood(this)">B</div>
+        <div class="blood-opt" data-type="O" onclick="pickBlood(this)">O</div>
+        <div class="blood-opt" data-type="AB" onclick="pickBlood(this)">AB</div>
+      </div>
+      <div class="field-error" id="bloodError" style="display:none">请选择血型。</div>
+    </div>
+
+    <div class="section-card">
+      <div class="sec-title">
+        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        登录 PIN 码
+      </div>
+      <div class="field">
+        <label>PIN 码 (4-6 位) *</label>
+        <input type="password" id="pin" placeholder="输入 4-6 位 PIN" maxlength="6" inputmode="numeric">
+        <div class="field-error">PIN 需为 4-6 位数字。</div>
+      </div>
+      <div class="field">
+        <label>确认 PIN 码 *</label>
+        <input type="password" id="pinConfirm" placeholder="再次输入 PIN" maxlength="6" inputmode="numeric">
+        <div class="field-error">两次 PIN 输入不一致。</div>
+      </div>
+    </div>
+
+    <div class="nfc-section" id="nfcSection">
+      <div class="nfc-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H4V4h16v16zM18 6h-5c-1.1 0-2 .9-2 2v2.28c-.6.35-1 .98-1 1.72 0 1.1.9 2 2 2s2-.9 2-2c0-.74-.4-1.38-1-1.72V8h3v8H8V8h2V6H6v12h12V6z"/></svg>
+      </div>
+      <div class="nfc-text">
+        <div class="t">同时写入 NFC 卡</div>
+        <div class="d">创建后立即将信息写入空白 NFC 标签</div>
+      </div>
+      <div class="nfc-switch on" id="nfcSwitch" onclick="toggleNfc()"></div>
+    </div>
+
+    <div class="ndef-preview" id="ndefPreview" style="margin:14px 0 0">
+      <div class="label">NDEF 预览</div>
+      <div id="ndefText">姓名|血型|年龄|职务|编号|用尽时间</div>
+    </div>
+    <div class="validation-panel" id="validationPanel" role="alert"></div>
+
+  </div>
+</div>
+
+<div class="sticky-bottom">
+  <button class="btn btn-secondary" onclick="location.href='02-roster.html'">取消</button>
+  <button class="btn btn-primary" onclick="submitForm()">创建安全员</button>
+</div>
+
+<div class="toast" id="toast">安全员创建成功</div>
+
+<script src="_shared.js"></script>
+<script>injectChrome({nav:false});</script>
+<script>
+let selectedRole = '安全官';
+let selectedBlood = '';
+let nfcOn = true;
+const existingCodes = ['001','003','004','006','007','008','009','011'];
+
+function pickRole(el) {
+  document.querySelectorAll('.role-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedRole = el.dataset.role;
+  updateNdef();
+}
+
+function pickBlood(el) {
+  document.querySelectorAll('.blood-opt').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedBlood = el.dataset.type;
+  updateNdef();
+}
+
+function toggleNfc() {
+  nfcOn = !nfcOn;
+  document.getElementById('nfcSwitch').classList.toggle('on', nfcOn);
+  document.getElementById('ndefPreview').style.display = nfcOn ? '' : 'none';
+}
+
+function updateNdef() {
+  const name = document.getElementById('name').value.trim() || '姓名';
+  const blood = selectedBlood || '血型';
+  const age = document.getElementById('age').value || '年龄';
+  const code = document.getElementById('code').value.trim() || '编号';
+  document.getElementById('ndefText').textContent =
+    name + '|' + blood + '|' + age + '|' + selectedRole + '|' + code + '|40.0';
+}
+
+document.getElementById('name').addEventListener('input', updateNdef);
+document.getElementById('age').addEventListener('input', updateNdef);
+document.getElementById('code').addEventListener('input', updateNdef);
+
+function submitForm() {
+  const name = document.getElementById('name').value.trim();
+  const code = document.getElementById('code').value.trim();
+  const age = Number(document.getElementById('age').value);
+  const pin = document.getElementById('pin').value;
+  const pin2 = document.getElementById('pinConfirm').value;
+  const errors = [];
+
+  document.querySelectorAll('.field.invalid').forEach(f => f.classList.remove('invalid'));
+  document.querySelectorAll('input[aria-invalid="true"]').forEach(i => i.removeAttribute('aria-invalid'));
+  document.getElementById('bloodError').style.display = 'none';
+  const validationPanel = document.getElementById('validationPanel');
+  validationPanel.classList.remove('show');
+  validationPanel.textContent = '';
+
+  function mark(inputId, msg) {
+    const input = document.getElementById(inputId);
+    input.closest('.field').classList.add('invalid');
+    input.setAttribute('aria-invalid', 'true');
+    errors.push(msg);
+    if (errors.length === 1) input.focus();
+  }
+
+  if (!name) mark('name', '姓名不能为空');
+  if (!age || age < 18 || age > 60) mark('age', '年龄需在 18-60 岁之间');
+  if (!code || existingCodes.includes(code.padStart(3, '0'))) mark('code', '编号为空或已存在');
+  if (!selectedBlood) {
+    document.getElementById('bloodError').style.display = 'block';
+    errors.push('请选择血型');
+  }
+  if (!/^\d{4,6}$/.test(pin)) mark('pin', 'PIN 需为 4-6 位数字');
+  if (pin !== pin2) mark('pinConfirm', '两次 PIN 输入不一致');
+
+  if (errors.length) {
+    validationPanel.textContent = '无法创建：' + errors.join('；') + '。';
+    validationPanel.classList.add('show');
+    return;
+  }
+
+  if (nfcOn) {
+    location.href = '09-nfc-write.html';
+  } else {
+    var t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(function() { location.href = '02-roster.html'; }, 1200);
+  }
+}
+</script>
+</body>
+</html>

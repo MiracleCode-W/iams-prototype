@@ -1,0 +1,197 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>进场确认 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.nfc-success { background: linear-gradient(135deg, var(--success) 0%, #1B5E20 100%); color: #fff; padding: 18px 16px; display: flex; align-items: center; gap: 14px; }
+.nfc-success .ring { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nfc-success .ring svg { width: 22px; height: 22px; fill: #fff; }
+.nfc-success .t { flex: 1; min-width: 0; }
+.nfc-success .t b { font-size: 14px; }
+.nfc-success .t span { display: block; font-size: 11px; opacity: 0.85; margin-top: 2px; font-family: var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-card { padding: 16px; background: var(--surface); }
+.profile-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.profile-head .avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; }
+.profile-head .info .name { font-size: 20px; font-weight: 700; color: var(--fg); }
+.profile-head .info .role { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.kv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-soft); border-radius: var(--r-md); overflow: hidden; }
+.kv-grid .kv { background: var(--surface); padding: 10px 12px; }
+.kv-grid .kv .k { font-size: 11px; color: var(--muted); }
+.kv-grid .kv .v { font-size: 14px; font-weight: 600; color: var(--fg); margin-top: 4px; font-family: var(--font-mono); }
+.pressure-input { background: linear-gradient(135deg, var(--primary-tint) 0%, #FFD180 100%); padding: 16px; margin: 10px 16px; border-radius: var(--r-md); }
+.pressure-input .t { font-size: 11px; color: var(--primary-dark); font-weight: 600; letter-spacing: 0.5px; }
+.pressure-input .row { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; }
+.pressure-input .num { font-size: 44px; font-weight: 700; color: var(--fg); font-family: var(--font-mono); line-height: 1; }
+.pressure-input .unit { font-size: 16px; color: var(--muted); font-weight: 500; }
+.pressure-input .calc { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(230,81,0,0.2); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--primary-dark); }
+.pressure-input .calc b { font-size: 18px; font-family: var(--font-mono); }
+.slider-wrap { margin-top: 12px; }
+.slider { width: 100%; height: 6px; background: rgba(255,255,255,0.6); border-radius: 3px; position: relative; }
+.slider .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--primary-dark); border-radius: 3px; width: 95%; }
+.slider .handle { position: absolute; right: 5%; top: 50%; transform: translate(50%,-50%); width: 22px; height: 22px; background: var(--primary-dark); border: 3px solid #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+.slider-scale { display: flex; justify-content: space-between; font-size: 10px; color: var(--primary-dark); margin-top: 8px; font-family: var(--font-mono); }
+.section-block { background: var(--surface); margin-bottom: 10px; }
+.section-block .head { padding: 12px 16px 6px; font-size: 12px; color: var(--muted); font-weight: 600; }
+.task-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 0 16px 14px; }
+.task-grid .opt { padding: 10px; text-align: center; border: 1px solid var(--border); border-radius: var(--r-sm); font-size: 13px; cursor: pointer; background: var(--surface); color: var(--fg-2); }
+.task-grid .opt.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+.task-grid .opt .ic { display: block; font-size: 18px; margin-bottom: 4px; }
+.loc-input { padding: 0 16px 16px; display: flex; gap: 8px; }
+.loc-input input { flex: 1; height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--r-sm); font-size: 15px; font-family: inherit; background: var(--surface); color: var(--fg); }
+.loc-input .voice { width: 44px; background: var(--primary-tint); border: 1px solid var(--primary-light); border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.loc-input .voice svg { width: 20px; height: 20px; fill: var(--primary-dark); }
+.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 16px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; z-index: 90; }
+.verify-panel { background: var(--surface); margin-bottom: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border-soft); }
+.verify-panel .vh { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.verify-panel .vh b { font-size: 13px; color: var(--fg); }
+.verify-panel .vh span { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+.check-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.check { min-height: 36px; border-radius: var(--r-sm); background: var(--success-bg); color: var(--success); padding: 6px 8px; font-size: 11px; line-height: 1.25; font-weight: 600; }
+.check.warn { background: #FFF8E1; color: #795B00; }
+.degrade-card { margin: 0 16px 10px; border: 1px solid #FFE0B2; background: #FFF8E1; border-radius: var(--r-md); padding: 12px; display: flex; gap: 10px; align-items: flex-start; }
+.degrade-card .icon { width: 28px; height: 28px; border-radius: 50%; background: var(--warn); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; }
+.degrade-card .copy { flex: 1; min-width: 0; }
+.degrade-card .copy b { display: block; font-size: 13px; color: var(--fg); }
+.degrade-card .copy span { display: block; font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+.degrade-card button { height: 32px; padding: 0 10px; border-radius: var(--r-sm); border: none; background: var(--primary); color: #fff; font-size: 12px; font-weight: 700; font-family: inherit; }
+.guard-row { margin: 0 16px 10px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border-soft); padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.guard-row .copy b { display: block; font-size: 12px; color: var(--fg); }
+.guard-row .copy span { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.guard-row .tag { color: var(--info); background: var(--info-bg); border-radius: var(--r-pill); padding: 4px 8px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <button class="back" onclick="location.href='01-board.html'"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <div class="title-block"><div class="title">进场确认</div><div class="subtitle">NFC 已感应</div></div>
+</div>
+
+<div class="scroll-area" style="bottom:68px">
+  <div class="nfc-success">
+    <div class="ring"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+    <div class="t"><b>NFC 标签读取成功</b><span>UID 04:A3:B2:C1:D5:E7:F9</span></div>
+  </div>
+
+  <div class="verify-panel">
+    <div class="vh"><b>标签可信校验</b><span>v1 · FS-BJ-CY-003</span></div>
+    <div class="check-list">
+      <div class="check">站点一致</div>
+      <div class="check">checksum 通过</div>
+      <div class="check">UID 已绑定本人</div>
+      <div class="check warn">3 秒防重复窗口中</div>
+    </div>
+  </div>
+
+  <div class="profile-card">
+    <div class="profile-head">
+      <div class="avatar">王</div>
+      <div class="info">
+        <div class="name">王五</div>
+        <div class="role">
+          <span class="pill pill-warn">战斗员</span>
+          <span class="pill">B 型血</span>
+          <span class="pill">26 岁</span>
+        </div>
+      </div>
+    </div>
+    <div class="kv-grid">
+      <div class="kv"><div class="k">编号</div><div class="v">003</div></div>
+      <div class="kv"><div class="k">6.8L 用尽时间</div><div class="v">38.0 min</div></div>
+    </div>
+  </div>
+
+  <div class="pressure-input">
+    <div class="t">当前气压</div>
+    <div class="row"><div class="num">28.5</div><div class="unit">MPa</div></div>
+    <div class="slider-wrap">
+      <div class="slider"><div class="fill"></div><div class="handle"></div></div>
+      <div class="slider-scale"><span>0</span><span>10</span><span>20</span><span>30</span><span>40</span></div>
+    </div>
+    <div class="calc">
+      <span>估算剩余 (满压 30 MPa)</span>
+      <b>36 : 06</b>
+    </div>
+  </div>
+
+  <div class="guard-row">
+    <div class="copy"><b>状态机检查</b><span>该人员当前为“未进场”，允许确认进场；如已在内攻中将被拦截。</span></div>
+    <div class="tag">可进场</div>
+  </div>
+
+  <div class="degrade-card">
+    <div class="icon">!</div>
+    <div class="copy"><b>NFC 失败时使用手动降级</b><span>三次重试失败后输入编号匹配花名册，历史、导出和审计日志会保留“未通过 NFC 验证”。</span></div>
+    <button onclick="manualFallback()">手动输入</button>
+  </div>
+
+  <div class="section-block">
+    <div class="head">本次任务</div>
+    <div class="task-grid">
+      <div class="opt"><span class="ic">🔍</span>侦察</div>
+      <div class="opt"><span class="ic">🔨</span>破拆</div>
+      <div class="opt active"><span class="ic">🔥</span>灭火</div>
+      <div class="opt"><span class="ic">🆘</span>搜救</div>
+      <div class="opt"><span class="ic">💡</span>照明</div>
+      <div class="opt"><span class="ic">💨</span>排烟</div>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="head">内攻位置</div>
+    <div class="loc-input">
+      <input type="text" value="B 座 13F 东侧通道" placeholder="输入或语音输入">
+      <button class="voice"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg></button>
+    </div>
+  </div>
+
+  <div style="height:80px"></div>
+</div>
+
+<div class="bottom-bar">
+  <button class="btn btn-secondary" style="flex:1" onclick="location.href='01-board.html'">取消</button>
+  <button class="btn btn-primary" style="flex:2" onclick="confirmEnter()">确认进场</button>
+</div>
+
+<script src="_shared.js"></script>
+<script>
+injectChrome({nav:false});
+document.querySelectorAll('.task-grid .opt').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.task-grid .opt').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+  });
+});
+function manualFallback() {
+  showBusinessConfirm({
+    title: '手动降级匹配',
+    message: '仅在 NFC 三次重试失败后使用。系统会按人员编号 003 匹配王五，并保留“未通过 NFC 验证”标记。',
+    danger: true,
+    confirmText: '按编号 003 匹配',
+    details: [
+      { k: '匹配结果', v: '王五 · 战斗员 · B 型血' },
+      { k: '原因', v: 'NFC 读取失败，安全员人工确认身份' },
+      { k: '审计', v: '导出与历史均保留降级标记' }
+    ],
+    onConfirm: () => showToast('已手动匹配编号 003 · 本次进场标记为未通过 NFC 验证')
+  });
+}
+function confirmEnter() {
+  showBusinessConfirm({
+    title: '确认进场',
+    message: '请确认人员身份、初始气压、任务和位置均已由安全员核对。确认后会创建倒计时并加入当前场次。',
+    confirmText: '确认进场',
+    details: [
+      { k: '人员', v: '王五 · 编号 003' },
+      { k: '初始气压', v: '28.5 MPa' },
+      { k: '任务位置', v: '灭火 · B 座 13F 东侧通道' }
+    ],
+    onConfirm: () => { location.href = '01-board.html'; }
+  });
+}
+</script>
+</body>
+</html>

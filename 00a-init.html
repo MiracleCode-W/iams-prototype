@@ -1,0 +1,416 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>初始化 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.init-wrap {
+  min-height: 100%;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.init-header {
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+  padding: 48px 28px 56px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.init-header::after {
+  content: ''; position: absolute; right: -40px; top: -40px;
+  width: 180px; height: 180px;
+  background: rgba(255,255,255,0.06); border-radius: 50%;
+}
+.init-header .step-label {
+  font-size: 12px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; opacity: 0.8;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+}
+.init-header h1 {
+  font-size: 22px; font-weight: 700;
+  line-height: 1.3;
+}
+.init-header .desc {
+  font-size: 13px; opacity: 0.85;
+  margin-top: 6px; line-height: 1.5;
+}
+
+.progress-bar {
+  display: flex; gap: 6px;
+  padding: 16px 20px 0;
+}
+.progress-bar .seg {
+  flex: 1; height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.3s;
+}
+.progress-bar .seg.done { background: var(--primary); }
+.progress-bar .seg.active { background: var(--primary); opacity: 0.5; }
+
+.step-body {
+  padding: 20px;
+  flex: 1;
+}
+
+.step-card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  margin-bottom: 16px;
+}
+
+.step-card .card-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.step-card .card-icon.orange { background: var(--primary-tint); }
+.step-card .card-icon.orange svg { fill: var(--primary-dark); width: 24px; height: 24px; }
+
+.step-card .card-title {
+  font-size: 16px; font-weight: 600; color: var(--fg);
+  margin-bottom: 4px;
+}
+.step-card .card-desc {
+  font-size: 12px; color: var(--muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.pin-setup {
+  display: flex; gap: 10px; margin-top: 8px;
+}
+.pin-setup .digit {
+  flex: 1; height: 48px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700;
+  font-family: var(--font-mono);
+  background: var(--surface);
+  transition: border-color 0.15s, background 0.15s;
+}
+.pin-setup .digit.filled {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+}
+
+.role-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-top: 12px;
+}
+.role-option {
+  padding: 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: var(--surface);
+}
+.role-option:active { background: var(--bg); }
+.role-option.selected {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+}
+.role-option .role-icon {
+  font-size: 22px; margin-bottom: 4px;
+}
+.role-option .role-name {
+  font-size: 13px; font-weight: 600; color: var(--fg);
+}
+.role-option .role-sub {
+  font-size: 10px; color: var(--muted); margin-top: 2px;
+}
+
+.done-hero {
+  text-align: center;
+  padding: 48px 20px 24px;
+}
+.done-hero .check-circle {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: var(--success);
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(46,125,50,0.3);
+}
+.done-hero .check-circle svg { width: 36px; height: 36px; fill: #fff; }
+.done-hero h2 {
+  font-size: 20px; font-weight: 700; color: var(--fg);
+  margin-bottom: 6px;
+}
+.done-hero p {
+  font-size: 13px; color: var(--muted);
+  line-height: 1.5;
+}
+
+.station-result {
+  margin: 0 20px;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.station-result .result-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.station-result .result-row:last-child { border-bottom: none; }
+.station-result .result-row .k { font-size: 12px; color: var(--muted); }
+.station-result .result-row .v { font-size: 14px; font-weight: 600; color: var(--fg); }
+.station-result .result-row .v.mono { font-family: var(--font-mono); color: var(--primary-dark); }
+.risk-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--danger-bg);
+  color: #7F1D1D;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.error-text {
+  min-height: 18px;
+  margin-top: 8px;
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.btn-row {
+  display: flex; gap: 10px;
+  padding: 16px 20px 28px;
+}
+.btn-row .btn { flex: 1; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="init-wrap">
+  <div class="init-header" id="initHeader">
+    <div class="step-label" id="stepLabel">STEP 1 / 3</div>
+    <h1 id="stepTitle">创建消防站</h1>
+    <div class="desc" id="stepDesc">首次使用需要初始化消防站信息，设置后将作为本站唯一标识</div>
+  </div>
+
+  <div class="progress-bar" id="progressBar">
+    <div class="seg active" data-i="0"></div>
+    <div class="seg" data-i="1"></div>
+    <div class="seg" data-i="2"></div>
+  </div>
+
+  <!-- Step 1: 创建消防站 -->
+  <div class="step-body" id="step1">
+    <div class="step-card">
+      <div class="card-icon orange">
+        <svg viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8z"/></svg>
+      </div>
+      <div class="card-title">消防站信息</div>
+      <div class="card-desc">设置消防站名称和站 ID，站 ID 设置后不可修改（需联系技术支持重置）</div>
+
+      <div class="field">
+        <label>消防站名称</label>
+        <input type="text" id="stationName" placeholder="例如：朝阳区第三消防站" maxlength="20">
+      </div>
+
+      <div class="field">
+        <label>消防站 ID (4-8 位字母/数字)</label>
+        <input type="text" id="stationId" placeholder="例如：CY003 或 FS-BJ-001" maxlength="12" style="font-family:var(--font-mono); letter-spacing:1px; text-transform:uppercase;">
+        <div class="hint" style="font-size:11px; color:var(--danger); margin-top:6px;">⚠ 一经设置不可自行修改</div>
+      </div>
+      <div class="risk-note">提交前会二次确认：站 ID 将用于 NFC 标签、备份恢复和审计归属；如设置错误，只能通过备份恢复或技术支持重置。</div>
+      <div class="error-text" id="step1Error" role="alert"></div>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="goStep(2)">下一步：创建管理员</button>
+
+    <div style="margin-top:16px; text-align:center;">
+      <a href="12-backup.html" style="font-size:13px; color:var(--info);">从备份文件恢复 →</a>
+    </div>
+  </div>
+
+  <!-- Step 2: 创建管理员账号 -->
+  <div class="step-body hidden" id="step2">
+    <div class="step-card">
+      <div class="card-icon orange">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+      </div>
+      <div class="card-title">管理员账号</div>
+      <div class="card-desc">创建管理员（每站 1-2 名），可管理安全员账号、系统设置、数据备份</div>
+
+      <div class="field">
+        <label>管理员姓名</label>
+        <input type="text" id="officerName" placeholder="例如：张伟" maxlength="10">
+      </div>
+
+      <div class="field">
+        <label>管理员 PIN 码 (4-6 位)</label>
+        <div class="pin-setup" id="officerPin">
+          <div class="digit filled">•</div>
+          <div class="digit filled">•</div>
+          <div class="digit filled">•</div>
+          <div class="digit filled">•</div>
+          <div class="digit"></div>
+          <div class="digit"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>确认 PIN 码</label>
+        <div class="pin-setup">
+          <div class="digit filled">•</div>
+          <div class="digit filled">•</div>
+          <div class="digit filled">•</div>
+          <div class="digit filled">•</div>
+          <div class="digit"></div>
+          <div class="digit"></div>
+        </div>
+      </div>
+      <div class="risk-note">管理员账号可修改站点配置、恢复备份、创建安全员；完成后会写入初始化审计记录。</div>
+      <div class="error-text" id="step2Error" role="alert"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(1)">上一步</button>
+      <button class="btn btn-primary" onclick="goStep(3)">完成初始化</button>
+    </div>
+  </div>
+
+  <!-- Step 3: 完成 -->
+  <div class="step-body hidden" id="step3">
+    <div class="done-hero">
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      </div>
+      <h2>初始化完成</h2>
+      <p>消防站和安全员已创建，其他人员可使用站 ID + PIN 登录</p>
+    </div>
+
+    <div class="station-result">
+      <div class="result-row">
+        <span class="k">消防站</span>
+        <span class="v" id="resultName">朝阳区第三消防站</span>
+      </div>
+      <div class="result-row">
+        <span class="k">站 ID</span>
+        <span class="v mono" id="resultId">CY003</span>
+      </div>
+      <div class="result-row">
+        <span class="k">管理员</span>
+        <span class="v" id="resultOfficer">张伟</span>
+      </div>
+      <div class="result-row">
+        <span class="k">角色</span>
+        <span class="v">管理员</span>
+      </div>
+      <div class="result-row">
+        <span class="k">PIN 码</span>
+        <span class="v mono">••••</span>
+      </div>
+    </div>
+
+    <div style="padding:16px 20px 0">
+      <button class="btn btn-primary btn-block" onclick="location.href='00-login.html'">进入登录页</button>
+    </div>
+    <div style="padding:8px 20px 0; text-align:center;">
+      <span style="font-size:11px; color:var(--muted);">初始化标记已写入本地，下次启动直接进登录页</span>
+    </div>
+  </div>
+</div>
+
+<script src="_shared.js"></script>
+<script>injectChrome({nav:false});</script>
+<script>
+let currentStep = 1;
+
+function goStep(n) {
+  if (n === 2) {
+    const name = document.getElementById('stationName').value.trim();
+    const id = document.getElementById('stationId').value.trim().toUpperCase();
+    const error = document.getElementById('step1Error');
+    error.textContent = '';
+    if (!name) { error.textContent = '请输入消防站名称。'; document.getElementById('stationName').focus(); return; }
+    if (!/^[A-Z0-9-]{4,12}$/.test(id)) { error.textContent = '站 ID 需为 4-12 位大写字母、数字或短横线。'; document.getElementById('stationId').focus(); return; }
+    showBusinessConfirm({
+      title: '确认站 ID',
+      message: '站 ID 完成初始化后不可自行修改，会写入 NFC 标签、审计日志和备份文件名。',
+      danger: true,
+      irreversible: '不可撤销：如站 ID 设置错误，只能走备份恢复或技术支持重置。',
+      confirmText: '确认并继续',
+      details: [
+        { k: '消防站', v: name },
+        { k: '站 ID', v: id },
+        { k: '恢复路径', v: '保留备份入口，异站点备份会拒绝恢复' }
+      ],
+      onConfirm: () => moveStep(2)
+    });
+    return;
+  }
+  if (n === 3) {
+    const oname = document.getElementById('officerName').value.trim();
+    const error = document.getElementById('step2Error');
+    error.textContent = '';
+    if (!oname) { error.textContent = '请输入管理员姓名。'; document.getElementById('officerName').focus(); return; }
+    showBusinessConfirm({
+      title: '完成初始化',
+      message: '将创建首个管理员，并写入本机初始化标记和审计记录。',
+      confirmText: '完成并写入审计',
+      details: [
+        { k: '管理员', v: oname },
+        { k: '权限', v: '账号、配置、备份恢复、审计导出' },
+        { k: '审计', v: 'INIT-20260612-001' }
+      ],
+      onConfirm: () => { fillResult(); moveStep(3); }
+    });
+    return;
+  }
+  moveStep(n);
+}
+
+function moveStep(n) {
+  document.getElementById('step' + currentStep).classList.add('hidden');
+  document.getElementById('step' + n).classList.remove('hidden');
+  currentStep = n;
+
+  const labels = ['', 'STEP 1 / 3', 'STEP 2 / 3', 'STEP 3 / 3'];
+  const titles = ['', '创建消防站', '创建管理员', '初始化完成'];
+  const descs = ['', '首次使用需要初始化消防站信息，设置后将作为本站唯一标识', '创建管理员账号，可管理安全员、系统设置、数据备份', '消防站和管理员已创建，跳转到登录页开始使用'];
+  document.getElementById('stepLabel').textContent = labels[n];
+  document.getElementById('stepTitle').textContent = titles[n];
+  document.getElementById('stepDesc').textContent = descs[n];
+
+  if (n === 3) {
+    document.getElementById('initHeader').style.background = 'linear-gradient(180deg, #2E7D32 0%, #1B5E20 100%)';
+  } else {
+    document.getElementById('initHeader').style.background = '';
+  }
+
+  document.querySelectorAll('.progress-bar .seg').forEach((seg, i) => {
+    seg.className = 'seg';
+    if (i < n - 1) seg.classList.add('done');
+    if (i === n - 1) seg.classList.add('active');
+  });
+}
+
+function fillResult() {
+  const name = document.getElementById('stationName').value.trim() || '未命名消防站';
+  const id = document.getElementById('stationId').value.trim().toUpperCase() || 'STN001';
+  const oname = document.getElementById('officerName').value.trim() || '管理员';
+  document.getElementById('resultName').textContent = name;
+  document.getElementById('resultId').textContent = id;
+  document.getElementById('resultOfficer').textContent = oname;
+}
+</script>
+</body>
+</html>

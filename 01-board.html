@@ -1,0 +1,305 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>内攻打板 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.banner { background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%); color: #fff; padding: 4px 16px 16px; }
+.banner-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px; }
+.banner-grid .cell { background: rgba(255,255,255,0.14); border-radius: var(--r-md); padding: 8px 10px; text-align: center; }
+.banner-grid .num { font-size: 22px; font-weight: 700; font-family: var(--font-mono); line-height: 1; }
+.banner-grid .lab { font-size: 10px; opacity: 0.85; margin-top: 4px; letter-spacing: 0.5px; }
+.banner-grid .cell.danger { background: var(--danger); }
+.toolbar { background: var(--surface); display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border-soft); }
+.toolbar .seg { flex: 1; display: flex; gap: 4px; background: var(--bg); border-radius: var(--r-pill); padding: 3px; }
+.toolbar .seg button { flex: 1; height: 30px; border: none; background: none; border-radius: var(--r-pill); font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; }
+.toolbar .seg button.active { background: var(--surface); color: var(--primary-dark); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+.toolbar .icon-btn { width: 36px; height: 36px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.toolbar .icon-btn svg { width: 18px; height: 18px; fill: var(--fg-2); }
+.list-wrap { padding: 12px; }
+.attack-card .pressure-bar { height: 4px; background: var(--border-soft); position: relative; }
+.attack-card .pressure-bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--timer-ok); }
+.attack-card.warn .pressure-bar i { background: var(--danger); }
+.attack-card .footer { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-top: 1px solid var(--border-soft); font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+.attack-card .footer .actions { display: flex; gap: 8px; }
+.attack-card .footer button { height: 26px; padding: 0 10px; border-radius: var(--r-pill); border: 1px solid var(--border); background: var(--surface); font-size: 11px; cursor: pointer; color: var(--fg-2); font-family: inherit; }
+.warn-banner { background: var(--danger); color: #fff; padding: 10px 14px; margin: 0 12px 10px; border-radius: var(--r-md); display: flex; align-items: center; gap: 10px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(211,47,47,0.4); } 50% { box-shadow: 0 0 0 8px rgba(211,47,47,0); } }
+.warn-banner svg { width: 22px; height: 22px; fill: #fff; flex-shrink: 0; }
+.warn-banner .txt { flex: 1; font-size: 13px; font-weight: 600; }
+.warn-banner button { background: rgba(255,255,255,0.25); color: #fff; border: none; height: 28px; padding: 0 10px; border-radius: var(--r-pill); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.fab { position: fixed; right: 16px; bottom: 64px; width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(255,152,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 90; }
+.fab svg { width: 24px; height: 24px; fill: #fff; }
+.scene-bar { background: var(--fg); color: #fff; padding: 8px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.scene-bar .live { width: 8px; height: 8px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 0 4px rgba(211,47,47,0.3); }
+.scene-bar .label { flex: 1; }
+.scene-bar .label b { color: var(--accent); }
+.scene-bar .duration { font-family: var(--font-mono); color: var(--accent); font-weight: 600; }
+.sync-strip { background: var(--surface); border-bottom: 1px solid var(--border-soft); padding: 8px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sync-pill { min-height: 44px; border: 1px solid var(--border-soft); border-radius: var(--r-md); padding: 7px 9px; display: flex; align-items: center; gap: 8px; background: var(--surface-2); }
+.sync-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px rgba(46,125,50,0.14); flex-shrink: 0; }
+.sync-pill.warn .dot { background: var(--warn); box-shadow: 0 0 0 3px rgba(255,152,0,0.16); }
+.sync-pill .copy { min-width: 0; }
+.sync-pill .copy b { display: block; font-size: 12px; color: var(--fg); line-height: 1.15; }
+.sync-pill .copy span { display: block; font-size: 10px; color: var(--muted); margin-top: 2px; font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.must-task { margin: 10px 12px 0; background: #B71C1C; color: #fff; border-radius: var(--r-md); padding: 12px; box-shadow: 0 3px 12px rgba(183,28,28,.22); }
+.must-task .eyebrow { font-size: 10px; font-family: var(--font-mono); letter-spacing: .6px; opacity: .86; }
+.must-task .name { margin-top: 4px; font-size: 18px; font-weight: 800; display: flex; justify-content: space-between; gap: 10px; }
+.must-task .name span:last-child { font-family: var(--font-mono); white-space: nowrap; }
+.must-task .why { margin-top: 6px; font-size: 12px; line-height: 1.45; opacity: .92; }
+.must-task .task-actions { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin-top: 10px; }
+.must-task button { min-height: 46px; border-radius: var(--r-md); border: 0; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.must-task .primary { background: #fff; color: #B71C1C; }
+.must-task .secondary { background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.32); }
+.priority-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px 12px 0; background: var(--bg); }
+.priority-strip .p { border-radius: var(--r-sm); padding: 7px 4px; text-align: center; background: var(--surface); border: 1px solid var(--border-soft); }
+.priority-strip .p b { display: block; font-family: var(--font-mono); font-size: 11px; line-height: 1; }
+.priority-strip .p span { display: block; font-size: 10px; color: var(--muted); margin-top: 3px; }
+.priority-strip .p.hot { background: #B71C1C; border-color: #B71C1C; color: #fff; }
+.priority-strip .p.hot span { color: rgba(255,255,255,.84); }
+.priority-strip .p.danger { background: var(--danger-bg); border-color: #FFCDD2; color: #B71C1C; }
+.safety-note { margin: 10px 12px 0; padding: 10px 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border-soft); color: var(--fg-2); font-size: 12px; line-height: 1.45; }
+.safety-note b { color: var(--danger); }
+.timeout-banner { background: #B71C1C; }
+.timeout-banner button { background: rgba(255,255,255,.22); }
+.attack-card.timeout .footer button { border-color: #B71C1C; color: #B71C1C; font-weight: 700; }
+.evac-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px 80px; }
+.evac-actions .btn-hold { min-height: 48px; }
+.evac-actions .btn-hold span:not(.hold-fill) { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <button class="back" aria-label="返回"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <div class="title-block">
+    <div class="title">内攻打板</div>
+    <div class="subtitle">本场次 · 朝阳区第三消防站</div>
+  </div>
+  <button class="action" aria-label="更多操作"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
+</div>
+
+<div class="scroll-area with-nav">
+
+<div class="scene-bar">
+  <span class="live"></span>
+  <span class="label">出警 · <b>朝阳区建国路 87 号 SOHO 现代城 B 座 14F</b></span>
+  <span class="duration">22:14</span>
+</div>
+
+<div class="sync-strip">
+  <div class="sync-pill">
+    <span class="dot"></span>
+    <div class="copy"><b>主机在线</b><span>主机 .12 · 同步延迟 0.8s</span></div>
+  </div>
+  <div class="sync-pill warn">
+    <span class="dot"></span>
+    <div class="copy"><b>1 条离线队列</b><span>平板 A-07 等待主机确认</span></div>
+  </div>
+</div>
+
+<div class="must-task" role="region" aria-label="当前必须处理任务">
+  <div class="eyebrow">P0 当前必须处理</div>
+  <div class="name"><span>陈勇 · 已超时且气压为 0.0 MPa</span><span>+02:14</span></div>
+  <div class="why">系统不会自动出场；请优先确认无线电状态或执行出场确认，其他告警已降级到任务队列下方。</div>
+  <div class="task-actions">
+    <button class="primary" onclick="location.href='05-exit.html'">确认出场</button>
+    <button class="secondary" onclick="showToast('已继续报警 · 30 秒后再次播报陈勇状态')">继续报警</button>
+  </div>
+</div>
+
+<div class="banner">
+  <div class="banner-grid">
+    <div class="cell"><div class="num">5</div><div class="lab">内攻中</div></div>
+    <div class="cell danger"><div class="num">1</div><div class="lab">超时</div></div>
+    <div class="cell"><div class="num">3</div><div class="lab">已出场</div></div>
+  </div>
+</div>
+
+<div class="priority-strip">
+  <div class="p hot"><b>P0</b><span>撤离</span></div>
+  <div class="p danger"><b>P1</b><span>超时</span></div>
+  <div class="p"><b>P2</b><span>低气量</span></div>
+  <div class="p"><b>P3</b><span>同步/NFC</span></div>
+</div>
+
+<div class="safety-note"><b>安全边界：</b>倒计时、NFC 与同步状态仅作辅助；出场、撤离和场次结束必须由安全员人工确认。</div>
+
+<div class="toolbar">
+  <div class="seg">
+    <button class="active">内攻中 (5)</button>
+    <button>已出场 (3)</button>
+  </div>
+  <button class="icon-btn" aria-label="按危险等级排序" title="排序"><svg viewBox="0 0 24 24"><path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/></svg></button>
+</div>
+
+<div class="warn-banner">
+  <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+  <span class="txt">唐明 · 剩余 06:42 低于预警线</span>
+  <button onclick="showToast('已记录提醒唐明 · 低气量告警继续保留')">已提醒</button>
+</div>
+
+<div class="warn-banner timeout-banner">
+  <svg viewBox="0 0 24 24"><path d="M11 7h2v6h-2V7zm0 8h2v2h-2v-2zM12 2 1 21h22L12 2z"/></svg>
+  <span class="txt">陈勇 · 已超时 02:14，持续警报；不可自动出场</span>
+  <button onclick="showToast('P1 超时不可静默 · 已转为持续播报')">继续播报</button>
+</div>
+
+<div class="list-wrap">
+  <div class="attack-card timeout">
+    <div class="ac-head"><div class="ac-avatar">陈</div><div class="ac-name"><div class="n">陈勇 · 战斗员</div><div class="r">编号 011 · O型 · 34岁 · P1 置顶</div></div><div class="ac-timer">02:14</div></div>
+    <div class="ac-meta"><div class="cell"><div class="k">气压</div><div class="v mono">0.0 MPa</div></div><div class="cell"><div class="k">任务</div><div class="v">搜救</div></div><div class="cell"><div class="k">位置</div><div class="v">B 座 14F 北侧</div></div></div>
+    <div class="pressure-bar"><i style="width:0%"></i></div>
+    <div class="footer"><span>进场 21:47 · 超时累计 02:14</span><div class="actions"><button onclick="showToast('已记录再次提醒陈勇 · 审计 EVT-2251')">继续提醒</button><button onclick="location.href='05-exit.html'">确认出场</button></div></div>
+  </div>
+
+  <div class="attack-card warn">
+    <div class="ac-head"><div class="ac-avatar">唐</div><div class="ac-name"><div class="n">唐明 · 指挥员</div><div class="r">编号 001 · A型 · 28岁</div></div><div class="ac-timer">06:42</div></div>
+    <div class="ac-meta"><div class="cell"><div class="k">气压</div><div class="v mono">8.4 MPa</div></div><div class="cell"><div class="k">任务</div><div class="v">搜救</div></div><div class="cell"><div class="k">位置</div><div class="v">B 座 12F 西</div></div></div>
+    <div class="pressure-bar"><i style="width:28%"></i></div>
+    <div class="footer"><span>进场 21:52 · 已 22:14</span><div class="actions"><button onclick="location.href='04-edit.html'">修改</button><button>呼叫</button></div></div>
+  </div>
+
+  <div class="attack-card">
+    <div class="ac-head"><div class="ac-avatar">李</div><div class="ac-name"><div class="n">李建国 · 战斗员</div><div class="r">编号 004 · O型 · 31岁</div></div><div class="ac-timer">14:08</div></div>
+    <div class="ac-meta"><div class="cell"><div class="k">气压</div><div class="v mono">18.2 MPa</div></div><div class="cell"><div class="k">任务</div><div class="v">破拆</div></div><div class="cell"><div class="k">位置</div><div class="v">B 座 14F</div></div></div>
+    <div class="pressure-bar"><i style="width:61%"></i></div>
+    <div class="footer"><span>进场 21:55 · 已 19:32</span><div class="actions"><button onclick="location.href='04-edit.html'">修改</button><button>呼叫</button></div></div>
+  </div>
+
+  <div class="attack-card">
+    <div class="ac-head"><div class="ac-avatar">王</div><div class="ac-name"><div class="n">王五 · 战斗员</div><div class="r">编号 003 · B型 · 26岁</div></div><div class="ac-timer">21:36</div></div>
+    <div class="ac-meta"><div class="cell"><div class="k">气压</div><div class="v mono">22.8 MPa</div></div><div class="cell"><div class="k">任务</div><div class="v">灭火</div></div><div class="cell"><div class="k">位置</div><div class="v">B 座 13F 东</div></div></div>
+    <div class="pressure-bar"><i style="width:76%"></i></div>
+    <div class="footer"><span>进场 22:02 · 已 12:11</span><div class="actions"><button onclick="location.href='04-edit.html'">修改</button><button>呼叫</button></div></div>
+  </div>
+
+  <div class="attack-card">
+    <div class="ac-head"><div class="ac-avatar">张</div><div class="ac-name"><div class="n">张明 · 战斗员</div><div class="r">编号 006 · AB型 · 24岁</div></div><div class="ac-timer">23:50</div></div>
+    <div class="ac-meta"><div class="cell"><div class="k">气压</div><div class="v mono">24.6 MPa</div></div><div class="cell"><div class="k">任务</div><div class="v">侦察</div></div><div class="cell"><div class="k">位置</div><div class="v">B 座 14F 北</div></div></div>
+    <div class="pressure-bar"><i style="width:82%"></i></div>
+    <div class="footer"><span>进场 22:05 · 已 09:04</span><div class="actions"><button onclick="location.href='04-edit.html'">修改</button><button>呼叫</button></div></div>
+  </div>
+
+  <div class="attack-card">
+    <div class="ac-head"><div class="ac-avatar">赵</div><div class="ac-name"><div class="n">赵磊 · 战斗员</div><div class="r">编号 008 · O型 · 29岁</div></div><div class="ac-timer">29:14</div></div>
+    <div class="ac-meta"><div class="cell"><div class="k">气压</div><div class="v mono">28.4 MPa</div></div><div class="cell"><div class="k">任务</div><div class="v">排烟</div></div><div class="cell"><div class="k">位置</div><div class="v">B 座 15F</div></div></div>
+    <div class="pressure-bar"><i style="width:94%"></i></div>
+    <div class="footer"><span>进场 22:11 · 已 03:31</span><div class="actions"><button onclick="location.href='04-edit.html'">修改</button><button>呼叫</button></div></div>
+  </div>
+</div>
+
+<div class="evac-actions">
+  <button class="btn btn-secondary" style="flex:1" onclick="location.href='06-history.html'">查看历史</button>
+  <button class="btn btn-danger btn-hold" id="evacBtn"><span class="hold-fill"></span><span>长按 3 秒紧急撤离</span></button>
+  <button class="btn btn-secondary" onclick="confirmEndScene()">结束本场次</button>
+  <button class="btn btn-danger" onclick="confirmBatchEvac()">全部撤离确认</button>
+</div>
+
+</div>
+
+<button class="fab" onclick="location.href='03-enter.html'" title="进场" aria-label="新增进场人员">
+  <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+</button>
+
+<script src="_shared.js"></script>
+<script>
+injectChrome({nav:'board'});
+function tick() {
+  document.querySelectorAll('.ac-timer').forEach(el => {
+    const [m,s] = el.textContent.split(':').map(Number);
+    let total = m*60+s-1;
+    if (total < 0) total = 0;
+    el.textContent = String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');
+  });
+  const dur = document.querySelector('.duration');
+  if (dur) {
+    const [m,s] = dur.textContent.split(':').map(Number);
+    let total = m*60+s+1;
+    dur.textContent = String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');
+  }
+}
+setInterval(tick, 1000);
+
+const evacBtn = document.getElementById('evacBtn');
+const fill = evacBtn.querySelector('.hold-fill');
+let holdStart = 0;
+let holdTimer = null;
+function startHold(e) {
+  e.preventDefault();
+  holdStart = Date.now();
+  fill.style.width = '0%';
+  clearInterval(holdTimer);
+  holdTimer = setInterval(() => {
+    const pct = Math.min(100, ((Date.now() - holdStart) / 3000) * 100);
+    fill.style.width = pct + '%';
+    if (pct >= 100) {
+      clearInterval(holdTimer);
+      showBusinessConfirm({
+        title: '触发全员紧急撤离',
+        message: '该操作会把所有内攻人员置为紧急撤离状态，持续报警，并要求逐一扫描或批量确认出场。',
+        danger: true,
+        irreversible: '不可撤销：触发后只能逐人出场确认或批量撤离确认，不能删除该审计事件。',
+        confirmText: '触发撤离',
+        details: [
+          { k: '影响范围', v: '当前 5 名内攻人员' },
+          { k: '操作人', v: '安全员张伟 · admin' },
+          { k: '审计', v: '写入紧急撤离事件，不可静默删除' }
+        ],
+        onConfirm: () => {
+        if (!document.querySelector('.evac-banner')) {
+          const banner = document.createElement('div');
+          banner.className = 'evac-banner';
+          banner.textContent = '紧急撤离已触发 · 等待出场确认';
+          document.body.appendChild(banner);
+        }
+        document.querySelectorAll('.attack-card').forEach(card => card.classList.add('evac'));
+        showToast('已触发紧急撤离 · 等待逐一扫描或批量确认');
+        }
+      });
+      fill.style.width = '0%';
+    }
+  }, 50);
+}
+function cancelHold() {
+  clearInterval(holdTimer);
+  if (fill.style.width !== '100%') fill.style.width = '0%';
+}
+evacBtn.addEventListener('mousedown', startHold);
+evacBtn.addEventListener('touchstart', startHold, { passive: false });
+['mouseup','mouseleave','touchend','touchcancel'].forEach(t => evacBtn.addEventListener(t, cancelHold));
+
+function confirmEndScene() {
+  showBusinessConfirm({
+    title: '结束本场次',
+    message: '仍在内攻中的人员会被标记为「场次结束-未出场」，用于事后复盘，不会伪造正常出场。',
+    irreversible: '不可撤销：本场次将进入历史记录，未出场人员会保留异常标记。',
+    confirmText: '结束并归档',
+    details: [
+      { k: '仍在内攻', v: '5 人，其中 1 人超时' },
+      { k: '审计结果', v: '生成场次结束事件与未出场名单' }
+    ],
+    onConfirm: () => { location.href = '06-history.html'; }
+  });
+}
+
+function confirmBatchEvac() {
+  showBusinessConfirm({
+    title: '全部撤离确认',
+    message: '批量确认仅用于紧急撤离场景。系统会保留未逐一扫描的标记，方便后续追溯。',
+    danger: true,
+    irreversible: '不可撤销：批量确认会写入每名人员的异常出场来源。',
+    confirmText: '确认全部撤离',
+    details: [
+      { k: '批量对象', v: '当前 5 名内攻人员' },
+      { k: '记录类型', v: '紧急撤离出场 · 批量确认' },
+      { k: '操作人', v: '安全员张伟' }
+    ],
+    onConfirm: () => { location.href = '06-history.html'; }
+  });
+}
+</script>
+</body>
+</html>

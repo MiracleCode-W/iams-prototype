@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>消防站管理 · 设置</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.station-hero { background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%); color:#fff; padding: 16px 16px 20px; }
+.station-hero .sid { font-family: var(--font-mono); font-size: 11px; opacity: 0.85; letter-spacing: 1px; }
+.station-hero .name { font-size: 20px; font-weight: 700; margin-top: 4px; display:flex; align-items:center; gap:8px; }
+.station-hero .name button { background: rgba(255,255,255,0.2); border: none; color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
+.station-hero .name button svg { width: 14px; height: 14px; fill: #fff; }
+.station-hero .meta { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
+.station-hero .meta .cell { background: rgba(255,255,255,0.14); border-radius: var(--r-md); padding: 8px 10px; text-align: center; }
+.station-hero .meta .num { font-size: 18px; font-weight: 700; font-family: var(--font-mono); }
+.station-hero .meta .lab { font-size: 10px; opacity: 0.85; margin-top: 2px; }
+.mode-label { margin: 10px 16px 0; padding: 9px 12px; border-radius: var(--r-md); background: var(--info-bg); color: #0D47A1; font-size: 12px; line-height: 1.45; }
+.mode-label b { display: block; margin-bottom: 2px; }
+.section { background: var(--surface); margin-top: 8px; }
+.section-title { padding: 12px 16px 6px; font-size: 11px; color: var(--muted); letter-spacing: 1px; font-weight: 800; }
+.row { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border-soft); cursor: pointer; min-height: 60px; }
+.row:last-child { border-bottom: none; }
+.row .ic { width: 36px; height: 36px; border-radius: var(--r-md); background: #FFF3E0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 12px; }
+.row .ic svg { width: 18px; height: 18px; fill: var(--primary); }
+.row .ic.warn { background: #FFEBEE; }
+.row .ic.warn svg { fill: var(--danger); }
+.row .ic.info { background: #E3F2FD; }
+.row .ic.info svg { fill: #1976D2; }
+.row .text { flex: 1; min-width: 0; }
+.row .text .t { font-size: 14px; font-weight: 600; color: var(--fg); }
+.row .text .d { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.row .val { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-right: 6px; }
+.row .chev { width: 16px; height: 16px; fill: var(--muted); flex-shrink: 0; }
+.row .switch { width: 40px; height: 22px; border-radius: 11px; background: var(--primary); position: relative; flex-shrink: 0; cursor: pointer; }
+.row .switch::after { content:''; position:absolute; right:2px; top:2px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.row .switch.off { background: #ccc; }
+.row .switch.off::after { left: 2px; right: auto; }
+.threshold-grid { padding: 4px 16px 14px; }
+.threshold-grid .item { display: flex; align-items: center; padding: 10px 0; border-top: 1px solid var(--border-soft); }
+.threshold-grid .item:first-child { border-top: none; }
+.threshold-grid .item .lab { flex: 1; font-size: 13px; color: var(--fg); }
+.threshold-grid .item .lab small { display: block; font-size: 10px; color: var(--muted); margin-top: 2px; }
+.threshold-grid .item .input { display:flex; align-items:center; background: var(--bg); border-radius: var(--r-md); padding: 4px 4px 4px 10px; }
+.threshold-grid .item .input input { width: 56px; border: none; background: none; font-size: 14px; font-weight: 600; font-family: var(--font-mono); color: var(--fg); text-align: right; outline: none; }
+.threshold-grid .item .input .unit { font-size: 11px; color: var(--muted); margin: 0 8px 0 4px; font-family: var(--font-mono); }
+.status-list { padding: 0 16px 14px; }
+.device-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--border-soft); }
+.device-row:first-child { border-top:none; }
+.device-row .role { width:42px; height:26px; border-radius:var(--r-pill); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; font-family:var(--font-mono); background:var(--info-bg); color:var(--info); flex-shrink:0; }
+.device-row .role.host { background:var(--success-bg); color:var(--success); }
+.device-row .role.offline { background:var(--danger-bg); color:var(--danger); }
+.device-row .copy { flex:1; min-width:0; }
+.device-row .copy b { display:block; font-size:13px; color:var(--fg); }
+.device-row .copy span { display:block; font-size:10px; color:var(--muted); font-family:var(--font-mono); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.guard-note { margin: 0 16px 14px; border-radius: var(--r-md); background: #FFF8E1; border: 1px solid #FFE0B2; padding: 10px 12px; font-size: 12px; color: #5D4300; line-height: 1.45; }
+.guard-note b { display:block; color:#795B00; margin-bottom:2px; }
+.danger-zone { background: #FFF8F8; padding: 16px; margin-top: 8px; border-top: 1px solid #FFE0E0; }
+.danger-zone .dz-title { font-size: 11px; color: var(--danger); font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
+.danger-zone button { width: 100%; height: 48px; border-radius: var(--r-md); border: 1px solid #FFCDD2; background: #fff; color: var(--danger); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 8px; }
+.danger-zone button:first-of-type { margin-top: 0; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: flex-end; }
+.modal.show { display: flex; }
+.modal-card { width: 100%; background: var(--surface); border-radius: var(--r-lg) var(--r-lg) 0 0; padding: 18px 18px 24px; }
+.modal-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+.modal-card .field { margin-bottom: 12px; }
+.modal-card .field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+.modal-card .field input { width: 100%; height: 48px; border: 1px solid var(--border); border-radius: var(--r-md); padding: 0 12px; font-size: 14px; font-family: var(--font-mono); outline: none; box-sizing: border-box; }
+.modal-card .actions { display: flex; gap: 10px; margin-top: 14px; }
+.modal-card .actions button { flex: 1; height: 48px; border-radius: var(--r-md); border: none; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.modal-card .actions .cancel { background: var(--bg); color: var(--fg-2); }
+.modal-card .actions .save { background: var(--primary); color: #fff; }
+.about { padding: 14px 16px 88px; text-align: center; }
+.about .name { font-size: 14px; font-weight: 700; color: var(--fg); }
+.about .ver { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="appbar">
+  <button class="back" aria-label="返回打板" onclick="location.href='01-board.html'"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <div class="title-block"><div class="title">消防站管理</div><div class="subtitle">管理员设置 · 安全员只读</div></div>
+</div>
+
+<div class="scroll-area with-nav">
+  <div class="station-hero">
+    <div class="sid">FS-BJ-CY-003</div>
+    <div class="name">朝阳区第三消防站<button aria-label="修改消防站名称" onclick="openEdit('name')"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button></div>
+    <div class="meta"><div class="cell"><div class="num">12</div><div class="lab">安全员</div></div><div class="cell"><div class="num">3</div><div class="lab">在线设备</div></div><div class="cell"><div class="num">180</div><div class="lab">审计天数</div></div></div>
+  </div>
+
+  <div class="mode-label"><b>现场常用设置</b>报警阈值、声音与同步状态放在前半屏；安全员可以查看，修改需要管理员 PIN。</div>
+  <div class="section">
+    <div class="section-title">倒计时与报警</div>
+    <div class="threshold-grid">
+      <div class="item"><div class="lab">满气气压<small>全局倒计时计算基准</small></div><div class="input"><input type="text" value="30" inputmode="decimal"><span class="unit">MPa</span></div></div>
+      <div class="item"><div class="lab">低气量预警阈值<small>剩余时间低于此值时置顶和提醒</small></div><div class="input"><input type="text" value="10" inputmode="numeric"><span class="unit">分</span></div></div>
+      <div class="item"><div class="lab">预警重复间隔<small>声音/震动重复提醒；静默后恢复</small></div><div class="input"><input type="text" value="30" inputmode="numeric"><span class="unit">秒</span></div></div>
+      <div class="item"><div class="lab">NFC 防重复间隔<small>同一标签重复感应只保留首次有效操作</small></div><div class="input"><input type="text" value="3" inputmode="numeric"><span class="unit">秒</span></div></div>
+    </div>
+    <div class="guard-note"><b>报警优先级</b>P0 紧急撤离不可静默；P1 超时、P2 低气量仅静默声音和震动，视觉警示与排序保留。</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">多设备同步</div>
+    <div class="status-list">
+      <div class="device-row"><div class="role host">主机</div><div class="copy"><b>Pixel 7 · 张伟</b><span>device-12 · 最后同步 0.8s 前 · 处理写操作</span></div></div>
+      <div class="device-row"><div class="role">客户端</div><div class="copy"><b>平板 A-07 · 李娜</b><span>device-07 · 离线队列 1 条 · 等待主机确认</span></div></div>
+      <div class="device-row"><div class="role offline">离线</div><div class="copy"><b>备用机 03</b><span>device-03 · 离线 14s · 恢复后先拉取主机数据</span></div></div>
+    </div>
+    <div class="guard-note"><b>冲突处理</b>以主机接收时间为准；重复进场、过期修改和离线提交会写入冲突日志，可在审计日志追溯。</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">声音与通知</div>
+    <div class="row"><div class="ic info"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div><div class="text"><div class="t">声音报警</div><div class="d">低气量、撤离触发；P0 不可静默</div></div><div class="switch" onclick="this.classList.toggle('off')"></div></div>
+    <div class="row"><div class="ic info"><svg viewBox="0 0 24 24"><path d="M16 17h5l-1.4-1.4L18.2 14.2 16 12v5zM4 4h5L7 6H4v12h12v-3l2-2v5c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg></div><div class="text"><div class="t">震动提醒</div><div class="d">倒计时归零、低气量和手动降级</div></div><div class="switch" onclick="this.classList.toggle('off')"></div></div>
+  </div>
+
+  <div class="mode-label"><b>管理员低频设置</b>站点信息、审计导出和备份恢复为低频高风险操作，进入前均保留确认和审计。</div>
+  <div class="section">
+    <div class="section-title">站点与权限</div>
+    <div class="row" onclick="openEdit('name')"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18L19.82 8 12 11.82 4.18 8 12 4.18z"/></svg></div><div class="text"><div class="t">消防站名称</div><div class="d">朝阳区第三消防站</div></div><svg class="chev" viewBox="0 0 24 24"><path d="M9.29 6.71a.996.996 0 0 0 0 1.41L13.17 12l-3.88 3.88a.996.996 0 1 0 1.41 1.41l4.59-4.59a.996.996 0 0 0 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01z"/></svg></div>
+    <div class="row" onclick="openEdit('pin')"><div class="ic warn"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/></svg></div><div class="text"><div class="t">站点 PIN</div><div class="d">修改需管理员二次确认，连续错误会锁定</div></div><span class="val">••••••</span><svg class="chev" viewBox="0 0 24 24"><path d="M9.29 6.71a.996.996 0 0 0 0 1.41L13.17 12l-3.88 3.88a.996.996 0 1 0 1.41 1.41l4.59-4.59a.996.996 0 0 0 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01z"/></svg></div>
+    <div class="row" onclick="location.href='02-roster.html'"><div class="ic"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3z"/></svg></div><div class="text"><div class="t">安全员管理</div><div class="d">12 名 · 安全员视角只读</div></div><svg class="chev" viewBox="0 0 24 24"><path d="M9.29 6.71a.996.996 0 0 0 0 1.41L13.17 12l-3.88 3.88a.996.996 0 1 0 1.41 1.41l4.59-4.59a.996.996 0 0 0 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01z"/></svg></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">数据与审计</div>
+    <div class="row" onclick="location.href='11-audit.html'"><div class="ic info"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h12c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 8H8V9h8v2z"/></svg></div><div class="text"><div class="t">审计日志</div><div class="d">按人员、设备、场次快速定位</div></div><svg class="chev" viewBox="0 0 24 24"><path d="M9.29 6.71a.996.996 0 0 0 0 1.41L13.17 12l-3.88 3.88a.996.996 0 1 0 1.41 1.41l4.59-4.59a.996.996 0 0 0 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01z"/></svg></div>
+    <div class="row" onclick="exportHistory()"><div class="ic info"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></div><div class="text"><div class="t">导出全部历史</div><div class="d">CSV · 含气压修改和审计摘要</div></div><svg class="chev" viewBox="0 0 24 24"><path d="M9.29 6.71a.996.996 0 0 0 0 1.41L13.17 12l-3.88 3.88a.996.996 0 1 0 1.41 1.41l4.59-4.59a.996.996 0 0 0 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01z"/></svg></div>
+    <div class="row" onclick="location.href='12-backup.html'"><div class="ic info"><svg viewBox="0 0 24 24"><path d="M12 3 2 8v8c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8L12 3z"/></svg></div><div class="text"><div class="t">数据备份与恢复</div><div class="d">恢复前显示未结束场次和覆盖范围</div></div><svg class="chev" viewBox="0 0 24 24"><path d="M9.29 6.71a.996.996 0 0 0 0 1.41L13.17 12l-3.88 3.88a.996.996 0 1 0 1.41 1.41l4.59-4.59a.996.996 0 0 0 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01z"/></svg></div>
+  </div>
+
+  <div class="about"><div class="name">消防内攻管理平台</div><div class="ver">v1.0.3 · build 20260611</div></div>
+  <div class="danger-zone"><div class="dz-title">危险操作</div><button onclick="clearHistory()">清空历史记录</button><button onclick="logoutStation()">退出消防站</button><button onclick="unbindDevice()">解绑设备并重置</button></div>
+</div>
+
+<div class="modal" id="m"><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mTitle"><h3 id="mTitle">编辑</h3><div class="field"><label id="mLabel">值</label><input id="mInput" type="text"></div><div class="actions"><button class="cancel" onclick="closeModal()">取消</button><button class="save" onclick="saveModal()">保存</button></div></div></div>
+
+<script src="_shared.js"></script>
+<script>
+injectChrome({ nav: 'me' });
+function openEdit(k){
+  const m = document.getElementById('m');
+  if (k === 'name') {
+    document.getElementById('mTitle').textContent = '修改消防站名称';
+    document.getElementById('mLabel').textContent = '名称';
+    document.getElementById('mInput').value = '朝阳区第三消防站';
+    document.getElementById('mInput').type = 'text';
+  } else {
+    document.getElementById('mTitle').textContent = '修改站点 PIN';
+    document.getElementById('mLabel').textContent = '6 位数字';
+    document.getElementById('mInput').value = '';
+    document.getElementById('mInput').type = 'password';
+  }
+  m.classList.add('show');
+  document.getElementById('mInput').focus();
+}
+function closeModal(){ document.getElementById('m').classList.remove('show'); }
+function saveModal(){
+  closeModal();
+  showBusinessConfirm({
+    title: '保存管理员设置',
+    message: '该修改会影响本站全部设备，需要管理员二次确认。',
+    confirmText: '保存并写入审计',
+    details: [
+      { k: '操作人', v: '管理员张伟' },
+      { k: '影响范围', v: '本站所有安全员设备' },
+      { k: '审计', v: 'SET-20260612-01' }
+    ],
+    onConfirm: () => showToast('已保存 · 权限与审计设置已更新')
+  });
+}
+function exportHistory() {
+  showBusinessConfirm({
+    title: '导出全部历史',
+    message: '导出文件将包含人员进出场、气压修改、手动降级、同步冲突与审计日志。',
+    confirmText: '生成 CSV',
+    details: [
+      { k: '范围', v: '最近 180 天 · 当前消防站' },
+      { k: '权限', v: '管理员张伟二次确认' }
+    ],
+    onConfirm: () => showToast('CSV 已生成 · 含 17 条事件与 6 条审计')
+  });
+}
+function clearHistory() {
+  showBusinessConfirm({
+    title: '清空历史记录',
+    message: '此操作不可恢复。仅允许在已完成备份且无进行中场次时执行。',
+    danger: true,
+    irreversible: '不可撤销：清空后只能通过备份文件恢复。',
+    confirmText: '确认清空',
+    details: [
+      { k: '当前状态', v: '发现 1 个进行中场次，原型中阻止执行' },
+      { k: '替代操作', v: '先备份并结束场次' }
+    ],
+    onConfirm: () => showToast('已阻止清空：仍有进行中场次')
+  });
+}
+function logoutStation() {
+  showBusinessConfirm({
+    title: '退出当前消防站',
+    message: '退出后需重新输入消防站与账号 PIN。未上传记录会先尝试同步。',
+    confirmText: '同步并退出',
+    onConfirm: () => { location.href = '00-login.html'; }
+  });
+}
+function unbindDevice() {
+  showBusinessConfirm({
+    title: '解绑设备并重置',
+    message: '解绑会清除本机缓存、离线队列和设备密钥，需要管理员重新初始化。',
+    danger: true,
+    irreversible: '不可撤销：解绑后本机离线数据不可继续提交。',
+    confirmText: '解绑并重置',
+    details: [
+      { k: '设备', v: '平板 A-07 · 客户端' },
+      { k: '要求', v: '主机在线且备份完成' }
+    ],
+    onConfirm: () => { location.href = '00-login.html'; }
+  });
+}
+</script>
+</body>
+</html>

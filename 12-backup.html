@@ -1,0 +1,136 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>备份与恢复 · 消防内攻管理</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+.hero { background:linear-gradient(180deg,var(--primary) 0%,var(--primary-dark) 100%); color:#fff; padding:18px 16px 20px; }
+.hero .k { font-size:11px; opacity:.82; font-family:var(--font-mono); letter-spacing:.6px; }
+.hero h1 { font-size:20px; line-height:1.25; margin-top:5px; }
+.hero p { font-size:12px; opacity:.86; line-height:1.45; margin-top:6px; }
+.hero .file { margin-top:12px; background:rgba(255,255,255,.14); border-radius:var(--r-md); padding:10px; font-size:11px; font-family:var(--font-mono); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.panel { background:var(--surface); margin-top:10px; padding:14px 16px; }
+.panel h2 { font-size:14px; margin-bottom:4px; }
+.panel .desc { font-size:12px; color:var(--muted); line-height:1.45; margin-bottom:12px; }
+.metric-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.metric { border:1px solid var(--border-soft); border-radius:var(--r-md); padding:10px; background:var(--surface-2); }
+.metric b { display:block; font-size:17px; color:var(--fg); font-family:var(--font-mono); }
+.metric span { display:block; margin-top:3px; color:var(--muted); font-size:11px; }
+.step { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-top:1px solid var(--border-soft); }
+.step:first-of-type { border-top:none; }
+.step .num { width:24px; height:24px; border-radius:50%; background:var(--primary-tint); color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:11px; font-weight:800; flex-shrink:0; }
+.step b { display:block; font-size:13px; color:var(--fg); }
+.step span { display:block; color:var(--muted); font-size:11px; margin-top:2px; line-height:1.4; }
+.risk { margin:10px 16px 0; background:#FFF8F8; border:1px solid #FFCDD2; color:#7F1D1D; border-radius:var(--r-md); padding:11px 12px; font-size:12px; line-height:1.45; }
+.risk b { display:block; color:var(--danger); margin-bottom:2px; }
+.restore-check { background: var(--surface); margin: 10px 16px 0; border-radius: var(--r-md); border: 1px solid var(--border-soft); overflow: hidden; }
+.restore-check .hd { padding: 10px 12px; background: var(--surface-2); font-size: 12px; color: var(--fg); font-weight: 800; border-bottom: 1px solid var(--border-soft); }
+.restore-check .line { display: flex; align-items: flex-start; gap: 9px; padding: 10px 12px; border-bottom: 1px solid var(--border-soft); font-size: 12px; color: var(--fg-2); line-height: 1.4; }
+.restore-check .line:last-child { border-bottom: none; }
+.restore-check .mark { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: 900; background: var(--success-bg); color: var(--success); }
+.restore-check .mark.warn { background: var(--danger-bg); color: var(--danger); }
+.restore-check b { display: block; color: var(--fg); margin-bottom: 2px; }
+.action-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:14px 16px 80px; background:var(--surface); margin-top:10px; }
+.action-grid .btn { min-height:48px; }
+.progress { height:8px; border-radius:var(--r-pill); background:var(--border-soft); overflow:hidden; margin-top:10px; display:none; }
+.progress i { display:block; height:100%; width:0%; background:var(--success); transition:width .2s; }
+.toast { position:fixed; left:16px; right:16px; bottom:72px; background:var(--fg); color:#fff; border-radius:var(--r-md); padding:10px 12px; font-size:12px; display:none; z-index:210; }
+</style>
+</head>
+<body>
+<div class="appbar">
+  <button class="back" onclick="location.href='10-settings.html'"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <div class="title-block"><div class="title">备份与恢复</div><div class="subtitle">加密备份 · 同站点校验</div></div>
+</div>
+
+<div class="scroll-area with-nav">
+  <div class="hero">
+    <div class="k">FS-BJ-CY-003</div>
+    <h1>保护本地业务数据</h1>
+    <p>备份包含人员档案、历史记录、归档数据、系统配置和审计日志。恢复会覆盖当前本地数据，必须二次确认。</p>
+    <div class="file">建议文件名：FS-BJ-CY-003_20260612_223018.iamsbak</div>
+  </div>
+
+  <div class="panel">
+    <h2>当前数据</h2>
+    <div class="desc">本地 SQLite 数据可离线使用；空间不足时优先保留未归档业务数据和最近审计日志。</div>
+    <div class="metric-grid">
+      <div class="metric"><b>42</b><span>人员档案</span></div>
+      <div class="metric"><b>186</b><span>进出记录</span></div>
+      <div class="metric"><b>19</b><span>归档场次</span></div>
+      <div class="metric"><b>128</b><span>审计日志</span></div>
+    </div>
+    <div class="progress" id="progress"><i></i></div>
+  </div>
+
+  <div class="panel">
+    <h2>恢复流程</h2>
+    <div class="step"><div class="num">1</div><div><b>选择备份文件</b><span>仅支持 .iamsbak 加密压缩包。</span></div></div>
+    <div class="step"><div class="num">2</div><div><b>校验完整性与站点 ID</b><span>异站点备份会被拒绝，避免数据混淆。</span></div></div>
+    <div class="step"><div class="num">3</div><div><b>二次确认覆盖风险</b><span>导入成功后提示重启应用，并写入审计日志。</span></div></div>
+  </div>
+
+  <div class="risk"><b>高风险操作</b>恢复会覆盖当前所有本地数据；如当前存在未结束场次，必须先由管理员确认继续或结束场次。</div>
+
+  <div class="restore-check">
+    <div class="hd">恢复前覆盖清单</div>
+    <div class="line"><span class="mark warn">!</span><div><b>当前未结束场次：1 场</b>恢复会覆盖本地打板状态；建议先结束或归档，确认恢复时会写入异常审计。</div></div>
+    <div class="line"><span class="mark">✓</span><div><b>会覆盖的数据</b>人员档案、进出记录、归档场次、系统配置和审计日志。</div></div>
+    <div class="line"><span class="mark">✓</span><div><b>不会覆盖的数据</b>本机设备 ID、当前管理员登录态和导出文件副本。</div></div>
+  </div>
+
+  <div class="action-grid">
+    <button class="btn btn-primary" onclick="runBackup()">立即备份</button>
+    <button class="btn btn-secondary" onclick="chooseRestore()">选择文件</button>
+    <button class="btn btn-danger" style="grid-column:1 / -1" onclick="restoreData()">验证并恢复</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="_shared.js"></script>
+<script>
+injectChrome({nav:'me'});
+const toast = document.getElementById('toast');
+const progress = document.getElementById('progress');
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.style.display = 'block';
+  clearTimeout(window.toastTimer);
+  window.toastTimer = setTimeout(() => toast.style.display = 'none', 2200);
+}
+function animateProgress(done) {
+  progress.style.display = 'block';
+  progress.querySelector('i').style.width = '0%';
+  setTimeout(() => progress.querySelector('i').style.width = '100%', 40);
+  setTimeout(done, 650);
+}
+function runBackup() {
+  animateProgress(() => showToast('已生成加密备份：FS-BJ-CY-003_20260612_223018.iamsbak'));
+}
+function chooseRestore() {
+  document.querySelector('.hero .file').textContent = '已选择：FS-BJ-CY-003_20260612_223018.iamsbak · 站点 ID 校验通过';
+  showToast('已选择备份文件，站点 ID 校验通过');
+}
+function restoreData() {
+  showBusinessConfirm({
+    title: '恢复备份数据',
+    message: '恢复会覆盖当前所有本地数据。当前未结束场次会被备份数据替换，必须确认站点 ID 与备份摘要一致。',
+    danger: true,
+    irreversible: '不可撤销：恢复完成后只能通过新的备份文件再次恢复，不能回退到覆盖前状态。',
+    confirmText: '确认恢复',
+    details: [
+      { k: '站点校验', v: 'FS-BJ-CY-003 · 已通过' },
+      { k: '备份时间', v: '2026-06-12 22:30:18' },
+      { k: '未结束场次', v: '1 场，将写入恢复覆盖异常' },
+      { k: '覆盖范围', v: '人员、历史、归档、配置、审计' },
+      { k: '审计', v: '恢复人、文件摘要和结果将写入日志' }
+    ],
+    onConfirm: () => animateProgress(() => showToast('恢复完成，已写入审计日志；请重启应用'))
+  });
+}
+</script>
+</body>
+</html>
