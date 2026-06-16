@@ -4,9 +4,409 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>天气方位 · 消防内攻管理</title>
-<link rel="stylesheet" href="_shared.css">
+<style data-od-inline-asset="_shared.css">
+/* 消防内攻管理平台 - 共享样式 (Android, 橙色消防主题) */
+:root {
+  --primary: #FF9800;
+  --primary-dark: #E65100;
+  --primary-light: #FFE0B2;
+  --primary-tint: #FFF3E0;
+  --accent: #FFC107;
+  --bg: #F5F5F5;
+  --surface: #FFFFFF;
+  --surface-2: #FAFAFA;
+  --fg: #1A1A1A;
+  --fg-2: #333333;
+  --muted: #666666;
+  --meta: #999999;
+  --border: #E0E0E0;
+  --border-soft: #EEEEEE;
+  --danger: #D32F2F;
+  --danger-bg: #FFEBEE;
+  --warn: #FF9800;
+  --success: #2E7D32;
+  --success-bg: #E8F5E9;
+  --info: #1976D2;
+  --info-bg: #E3F2FD;
+  --timer-ok: #00897B;
+  --timer-warn: #FF9800;
+  --timer-danger: #D32F2F;
+  --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid rgba(255,152,0,0.42);
+  outline-offset: 2px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 原生系统状态栏 — 不再模拟, 让宿主系统显示 */
+.android-statusbar { display: none; }
+
+/* 底部导航 — 实色, 让原生导航栏在其下方 */
+.android-navbar {
+  height: 56px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-around;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 100;
+}
+.android-navbar .nav-btn {
+  flex: 1; height: 52px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  font-size: 10px; font-family: inherit;
+}
+.android-navbar .nav-btn svg { width: 22px; height: 22px; fill: currentColor; }
+.android-navbar .nav-btn.active { color: var(--primary); }
+.android-navbar .nav-btn:focus-visible { outline-offset: -4px; }
+
+.appbar {
+  background: var(--primary);
+  color: #fff;
+  height: 56px;
+  display: flex; align-items: center;
+  padding-left: 12px; padding-right: 12px;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  position: sticky; top: 0; z-index: 90;
+}
+.appbar .back { background: none; border: none; color: #fff; cursor: pointer; padding: 8px; display: flex; }
+.appbar .back svg { width: 22px; height: 22px; fill: #fff; }
+.appbar .title-block { flex: 1; min-width: 0; padding: 8px 0; }
+.appbar .title { font-size: 17px; font-weight: 600; line-height: 1.2; }
+.appbar .subtitle { font-size: 11px; opacity: 0.9; font-weight: 400; margin-top: 1px; }
+.appbar .action { background: none; border: none; color: #fff; padding: 8px; cursor: pointer; display: flex; }
+.appbar .action svg { width: 22px; height: 22px; fill: #fff; }
+
+.scroll-area {
+  position: absolute;
+  top: 56px; bottom: 0; left: 0; right: 0;
+  overflow-y: auto;
+  padding-bottom: 24px;
+}
+.scroll-area.with-nav { bottom: 0; padding-bottom: 72px; }
+.scroll-area.no-appbar { top: 0; padding-top: 0; }
+
+.card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  margin-bottom: 10px;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  height: 48px;
+  padding: 0 20px;
+  border-radius: var(--r-md);
+  font-size: 15px; font-weight: 600;
+  border: none; cursor: pointer;
+  font-family: inherit;
+  transition: background .15s, transform .05s;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:active { background: var(--primary-dark); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-secondary { background: var(--surface); color: var(--fg); border: 1px solid var(--border); }
+.btn-ghost { background: transparent; color: var(--primary); }
+.btn-block { width: 100%; }
+.btn-sm { height: 34px; padding: 0 12px; font-size: 13px; }
+
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+.field input, .field textarea, .field select {
+  width: 100%;
+  height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--fg);
+}
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-tint); }
+.field textarea { height: 72px; padding: 10px 12px; resize: none; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 22px; padding: 0 8px;
+  border-radius: var(--r-pill);
+  font-size: 11px; font-weight: 600;
+  background: var(--border-soft); color: var(--fg-2);
+  white-space: nowrap;
+}
+.pill-danger { background: var(--danger-bg); color: var(--danger); }
+.pill-warn { background: var(--primary-tint); color: var(--primary-dark); }
+.pill-success { background: var(--success-bg); color: var(--success); }
+.pill-info { background: var(--info-bg); color: var(--info); }
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+.divider { height: 1px; background: var(--border); margin: 8px 0; }
+.spacer-12 { height: 12px; } .spacer-20 { height: 20px; }
+
+.list-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-soft);
+}
+.list-item:active { background: var(--bg); }
+.list-item .avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--primary-tint); color: var(--primary-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 15px;
+}
+.list-item .meta { flex: 1; min-width: 0; }
+.list-item .meta .name { font-size: 15px; font-weight: 600; color: var(--fg); }
+.list-item .meta .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.empty {
+  padding: 60px 20px; text-align: center; color: var(--muted);
+}
+.empty .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+
+.section-title {
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 14px 16px 6px;
+}
+
+/* 弹窗遮罩 */
+.modal-mask {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; padding: 20px;
+}
+.business-modal {
+  width: 100%; max-width: 360px;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.business-modal .modal-head { padding: 16px 16px 8px; }
+.business-modal .modal-head h3 { font-size: 17px; font-weight: 600; color: var(--fg); }
+.business-modal .modal-body { padding: 8px 16px 16px; color: var(--fg-2); font-size: 14px; }
+.business-modal .modal-warning {
+  margin-top: 10px;
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
+  background: var(--danger-bg);
+  color: #7F1D1D;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+.business-modal .modal-actions { display: flex; border-top: 1px solid var(--border-soft); }
+.business-modal .modal-actions button {
+  flex: 1; height: 48px; background: none; border: none;
+  font-size: 15px; font-weight: 600; cursor: pointer; color: var(--muted);
+  font-family: inherit;
+}
+.business-modal .modal-actions button + button { border-left: 1px solid var(--border-soft); color: var(--primary); }
+.business-modal .modal-actions button.danger { color: var(--danger); }
+.business-modal .risk-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  font-size: 12px;
+  color: var(--muted);
+}
+.business-modal .risk-list b { color: var(--fg-2); }
+.toast {
+  position: fixed;
+  left: 16px; right: 16px; bottom: 72px;
+  z-index: 260;
+  min-height: 48px;
+  display: flex; align-items: center;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: rgba(26,26,26,0.94);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.24);
+}
+
+/* 状态栏图标 */
+.bars { display: inline-flex; gap: 1px; align-items: end; }
+.bars i { width: 2px; background: #fff; border-radius: 1px; }
+.bars i:nth-child(1){height:4px} .bars i:nth-child(2){height:6px}
+.bars i:nth-child(3){height:8px} .bars i:nth-child(4){height:10px}
+
+/* 内攻打板专用 */
+.attack-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  margin-bottom: 10px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.attack-card.warn {
+  background: var(--primary-tint);
+}
+.attack-card.warn::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px; background: var(--danger);
+}
+.attack-card .ac-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px 8px;
+}
+.attack-card .ac-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 14px;
+}
+.attack-card .ac-name { flex: 1; }
+.attack-card .ac-name .n { font-size: 15px; font-weight: 600; color: var(--fg); }
+.attack-card .ac-name .r { font-size: 11px; color: var(--muted); }
+.attack-card .ac-timer {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px; font-weight: 700;
+  color: var(--timer-ok);
+}
+.attack-card.warn .ac-timer { color: var(--timer-danger); }
+.attack-card .ac-meta {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  padding: 0 14px 12px;
+  gap: 8px;
+}
+.attack-card .ac-meta .cell .k { font-size: 10px; color: var(--muted); }
+.attack-card .ac-meta .cell .v { font-size: 13px; font-weight: 500; color: var(--fg); margin-top: 2px; }
+
+/* 超时状态卡片 (PRD 2.6.6) */
+.attack-card.timeout {
+  background: #FFEBEE;
+  animation: timeout-pulse 1.2s ease-in-out infinite;
+}
+.attack-card.timeout::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px; background: #B71C1C;
+}
+.attack-card.timeout .ac-timer { color: #B71C1C; }
+.attack-card.timeout .ac-name .n::after {
+  content: '⚠ 已超时'; display: inline-block;
+  margin-left: 6px; padding: 1px 6px;
+  font-size: 10px; font-weight: 700;
+  color: #fff; background: #B71C1C; border-radius: 3px;
+  vertical-align: middle;
+}
+@keyframes timeout-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(183,28,28,0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(183,28,28,0); }
+}
+
+/* 紧急撤离全屏覆盖 (PRD 2.6.7) */
+.evac-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 95;
+  background: #B71C1C; color: #fff;
+  padding: 8px 16px; text-align: center;
+  font-size: 13px; font-weight: 700; letter-spacing: 1px;
+  animation: evac-flash 0.8s ease-in-out infinite;
+}
+@keyframes evac-flash {
+  0%, 100% { background: #B71C1C; }
+  50% { background: #FF5252; }
+}
+.attack-card.evac { background: #FFEBEE; }
+.attack-card.evac::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px; background: #B71C1C;
+}
+.attack-card.evac .ac-name .n::after {
+  content: '⚠ 紧急撤离'; display: inline-block;
+  margin-left: 6px; padding: 1px 6px;
+  font-size: 10px; font-weight: 700;
+  color: #fff; background: #B71C1C; border-radius: 3px;
+}
+
+/* 长按按钮进度环 */
+.btn-hold {
+  position: relative; overflow: hidden;
+}
+.btn-hold .hold-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: rgba(255,255,255,0.25);
+  width: 0%;
+  transition: width 0.05s linear;
+}
+
+</style>
 <style>
-.wx-hero { background: linear-gradient(180deg, #29B6F6 0%, #0277BD 100%); color: #fff; padding: 20px 18px 24px; }
+.wx-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,0.18), rgba(255,255,255,0) 34%),
+    radial-gradient(circle at 84% 8%, rgba(154,203,219,0.22), rgba(154,203,219,0) 38%),
+    linear-gradient(135deg, #314D58 0%, #476B73 48%, #263C49 100%);
+  color: #fff;
+  padding: 20px 18px 24px;
+}
+.wx-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,0.10) 0 1px, transparent 1px 18px),
+    linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0));
+  opacity: 0.28;
+}
+.wx-hero::after {
+  content: "";
+  position: absolute;
+  left: -18%;
+  right: -18%;
+  bottom: -42px;
+  height: 86px;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.18), rgba(255,255,255,0) 68%);
+  filter: blur(10px);
+}
+.wx-hero > * { position: relative; z-index: 1; }
 .wx-hero .loc { display: flex; align-items: center; gap: 6px; font-size: 13px; opacity: 0.92; }
 .wx-hero .loc svg { width: 14px; height: 14px; fill: #fff; }
 .wx-hero .main { display: flex; align-items: flex-start; justify-content: space-between; margin-top: 8px; }
@@ -16,14 +416,82 @@
 .wx-hero .desc .ic { font-size: 38px; line-height: 1; }
 .wx-hero .desc .cond { font-size: 14px; margin-top: 4px; }
 .wx-hero .range { font-size: 11px; opacity: 0.85; margin-top: 4px; font-family: var(--font-mono); }
-.wind-card { background: var(--surface); margin: -16px 12px 0; border-radius: var(--r-md); padding: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: relative; z-index: 2; }
-.wind-card .hd { display: flex; align-items: center; justify-content: space-between; }
-.wind-card .hd .t { font-size: 13px; color: var(--muted); font-weight: 600; }
-.wind-card .hd .tag { font-size: 10px; padding: 2px 8px; background: var(--success-bg); color: var(--success); border-radius: var(--r-pill); font-weight: 600; }
-.compass-row { display: flex; gap: 14px; margin-top: 12px; align-items: center; }
-.compass { width: 130px; height: 130px; flex-shrink: 0; position: relative; }
+.compass-card { background: linear-gradient(180deg, #FFFFFF 0%, #FFF8EC 100%); margin: -16px 12px 10px; border-radius: var(--r-lg); padding: 14px; box-shadow: 0 6px 18px rgba(230,81,0,0.12); position: relative; z-index: 2; overflow: hidden; }
+.compass-card::before { content: ""; position: absolute; width: 168px; height: 168px; right: -54px; top: -62px; border-radius: 50%; background: radial-gradient(circle, rgba(255,152,0,0.18), rgba(255,152,0,0)); }
+.compass-layout { display: grid; grid-template-columns: 142px 1fr; gap: 14px; align-items: center; position: relative; z-index: 1; }
+.compass-copy .eyebrow, .wind-copy .eyebrow { font-size: 10px; color: var(--muted); font-weight: 800; letter-spacing: .08em; }
+.compass-copy .title, .wind-copy .title { margin-top: 4px; font-size: 17px; color: var(--fg); font-weight: 900; line-height: 1.2; }
+.compass-copy .desc, .wind-copy .desc { margin-top: 7px; font-size: 12px; color: var(--fg-2); line-height: 1.45; }
+.bearing-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 6px; margin-top: 10px; }
+.bearing-grid .cell { min-width: 0; border: 1px solid rgba(230,81,0,0.12); background: rgba(255,255,255,0.7); border-radius: var(--r-sm); padding: 7px 8px; }
+.bearing-grid .k { font-size: 10px; color: var(--muted); }
+.bearing-grid .v { margin-top: 2px; font-family: var(--font-mono); font-size: 13px; color: var(--primary-dark); font-weight: 900; }
+.compass { width: 136px; height: 136px; margin: 0 auto; position: relative; filter: drop-shadow(0 10px 18px rgba(230,81,0,0.16)); }
 .compass svg { width: 100%; height: 100%; }
-.wind-data { flex: 1; }
+.compass .ring { transform-origin: 65px 65px; animation: compass-drift 8s ease-in-out infinite; }
+.compass .needle { transform-origin: 65px 65px; animation: needle-settle 3.2s ease-in-out infinite; }
+.compass .hub-pulse { transform-origin: 65px 65px; animation: hub-pulse 1.8s ease-out infinite; }
+.compass .bearing-chip {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  transform: translateX(-50%);
+  min-width: 64px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  background: rgba(255,243,224,0.96);
+  color: var(--primary-dark);
+  border: 1px solid rgba(255,152,0,0.24);
+  font-size: 10px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  box-shadow: 0 3px 10px rgba(230,81,0,0.12);
+}
+.wind-card { background: var(--surface); margin: 0 12px 10px; border-radius: var(--r-lg); padding: 14px; border: 1px solid var(--border-soft); box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
+.wind-card .hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.wind-card .hd .t { font-size: 13px; color: var(--muted); font-weight: 700; }
+.wind-card .hd .tag { font-size: 10px; padding: 2px 8px; background: var(--success-bg); color: var(--success); border-radius: var(--r-pill); font-weight: 700; white-space: nowrap; }
+.wind-layout { display: grid; grid-template-columns: 126px 1fr; gap: 14px; align-items: center; }
+.wind-dial { width: 126px; height: 126px; position: relative; filter: drop-shadow(0 8px 14px rgba(2,119,189,0.12)); }
+.wind-dial svg { width: 100%; height: 100%; }
+.wind-dial .wind-streak { stroke-dasharray: 12 70; stroke-dashoffset: 82; animation: wind-flow 2.4s linear infinite; opacity: 0.86; }
+.wind-dial .wind-streak.s2 { animation-delay: .45s; opacity: 0.54; }
+.wind-dial .wind-streak.s3 { animation-delay: .9s; opacity: 0.38; }
+.wind-dial .wind-pointer { transform-origin: 58px 58px; animation: vane-swing 3.4s ease-in-out infinite; }
+.wind-speed { display: flex; align-items: baseline; gap: 4px; margin-top: 10px; }
+.wind-speed .num { font-size: 34px; line-height: 1; font-weight: 900; color: var(--info); font-family: var(--font-mono); letter-spacing: -0.02em; }
+.wind-speed .unit { font-size: 12px; color: var(--muted); font-weight: 700; }
+.wind-risk { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.wind-risk .pill { display: inline-flex; align-items: center; min-height: 24px; padding: 0 9px; border-radius: var(--r-pill); background: var(--info-bg); color: var(--info); font-size: 10px; font-weight: 800; }
+.wind-risk .pill.warn { background: var(--primary-tint); color: var(--primary-dark); }
+@keyframes compass-drift {
+  0%, 100% { transform: rotate(-1.4deg); }
+  50% { transform: rotate(1.4deg); }
+}
+@keyframes needle-settle {
+  0%, 100% { transform: rotate(216deg); }
+  45% { transform: rotate(220deg); }
+  70% { transform: rotate(217deg); }
+}
+@keyframes wind-flow {
+  to { stroke-dashoffset: -88; }
+}
+@keyframes vane-swing {
+  0%, 100% { transform: rotate(216deg); }
+  48% { transform: rotate(222deg); }
+  72% { transform: rotate(218deg); }
+}
+@keyframes hub-pulse {
+  0% { transform: scale(0.9); opacity: 0.55; }
+  70%, 100% { transform: scale(2.4); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .compass .ring, .compass .needle, .compass .hub-pulse, .wind-dial .wind-streak, .wind-dial .wind-pointer { animation: none; }
+}
+.wind-data { margin-top: 12px; position: relative; z-index: 1; }
 .wind-data .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px dashed var(--border-soft); }
 .wind-data .row:last-child { border-bottom: none; }
 .wind-data .row .k { color: var(--muted); }
@@ -54,6 +522,12 @@
 .detail-grid .c .tx { flex: 1; }
 .detail-grid .c .k { font-size: 11px; color: var(--muted); }
 .detail-grid .c .v { font-size: 14px; font-weight: 700; color: var(--fg); font-family: var(--font-mono); margin-top: 2px; }
+@media (max-width: 380px) {
+  .compass-layout, .wind-layout { grid-template-columns: 1fr; }
+  .compass-copy { text-align: left; }
+  .compass { width: 126px; height: 126px; }
+  .wind-dial { width: 118px; height: 118px; margin: 0 auto; }
+}
 </style>
 </head>
 <body>
@@ -74,32 +548,109 @@
   </div>
 </div>
 
-<div class="wind-card">
-  <div class="hd"><div class="t">风向 · 风速</div><div class="tag">下风口已规避</div></div>
-  <div class="compass-row">
+<div class="compass-card">
+  <div class="compass-layout">
     <div class="compass">
       <svg viewBox="0 0 130 130">
-        <circle cx="65" cy="65" r="58" fill="none" stroke="#E6E6E6" stroke-width="2"/>
-        <circle cx="65" cy="65" r="48" fill="none" stroke="#F0F0F0" stroke-width="1" stroke-dasharray="2,4"/>
+        <defs>
+          <radialGradient id="compassFace" cx="50%" cy="46%" r="58%">
+            <stop offset="0%" stop-color="#FFFFFF"/>
+            <stop offset="66%" stop-color="#F7FBFF"/>
+            <stop offset="100%" stop-color="#E3F2FD"/>
+          </radialGradient>
+          <linearGradient id="needleGradient" x1="0" y1="12" x2="0" y2="-46" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#E65100"/>
+            <stop offset="100%" stop-color="#FFB300"/>
+          </linearGradient>
+          <filter id="needleShadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#E65100" flood-opacity="0.28"/>
+          </filter>
+        </defs>
+        <circle cx="65" cy="65" r="60" fill="url(#compassFace)" stroke="#D6EAF8" stroke-width="2"/>
+        <g class="ring">
+          <circle cx="65" cy="65" r="50" fill="none" stroke="#E6EEF5" stroke-width="1" stroke-dasharray="2,4"/>
+          <g stroke="#9BB7C8" stroke-linecap="round">
+            <line x1="65" y1="8" x2="65" y2="15" stroke-width="2"/>
+            <line x1="65" y1="115" x2="65" y2="122" stroke-width="1.5"/>
+            <line x1="8" y1="65" x2="15" y2="65" stroke-width="1.5"/>
+            <line x1="115" y1="65" x2="122" y2="65" stroke-width="1.5"/>
+            <line x1="24.7" y1="24.7" x2="29.7" y2="29.7" stroke-width="1"/>
+            <line x1="105.3" y1="24.7" x2="100.3" y2="29.7" stroke-width="1"/>
+            <line x1="24.7" y1="105.3" x2="29.7" y2="100.3" stroke-width="1"/>
+            <line x1="105.3" y1="105.3" x2="100.3" y2="100.3" stroke-width="1"/>
+          </g>
+        </g>
         <text x="65" y="14" text-anchor="middle" font-size="11" fill="#D32F2F" font-weight="700">N</text>
         <text x="65" y="124" text-anchor="middle" font-size="11" fill="#666">S</text>
         <text x="120" y="69" text-anchor="middle" font-size="11" fill="#666">E</text>
         <text x="10" y="69" text-anchor="middle" font-size="11" fill="#666">W</text>
-        <text x="65" y="69" text-anchor="middle" font-size="9" fill="#999" font-family="monospace">SW</text>
-        <text x="65" y="80" text-anchor="middle" font-size="9" fill="#999" font-family="monospace">218°</text>
-        <g transform="translate(65 65) rotate(218)">
-          <path d="M 0 -42 L 7 0 L 0 -10 L -7 0 Z" fill="#FF9800"/>
-          <circle cx="0" cy="0" r="5" fill="#E65100"/>
+        <circle class="hub-pulse" cx="65" cy="65" r="6" fill="#FF9800"/>
+        <g class="needle">
+          <g transform="translate(65 65)">
+            <path d="M 0 -44 L 9 4 L 0 -9 L -9 4 Z" fill="url(#needleGradient)" filter="url(#needleShadow)"/>
+            <path d="M 0 32 L 5 4 L 0 9 L -5 4 Z" fill="#90A4AE" opacity="0.86"/>
+            <circle cx="0" cy="0" r="7" fill="#E65100"/>
+            <circle cx="0" cy="0" r="3" fill="#FFF3E0"/>
+          </g>
+        </g>
+      </svg>
+      <div class="bearing-chip">SW · 218°</div>
+    </div>
+    <div class="compass-copy">
+      <div class="eyebrow">现场方位基准</div>
+      <div class="title">上风侧在西南，入口朝向已校准</div>
+      <div class="desc">指南针只回答“方位在哪里”，用于现场队员、车辆停靠点和建筑入口快速对齐。</div>
+      <div class="bearing-grid">
+        <div class="cell"><div class="k">当前朝向</div><div class="v">SW 218°</div></div>
+        <div class="cell"><div class="k">下风方向</div><div class="v">NE 038°</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wind-card">
+  <div class="hd"><div class="t">风向仪 · 下风口风险</div><div class="tag">下风口已规避</div></div>
+  <div class="wind-layout">
+    <div class="wind-dial">
+      <svg viewBox="0 0 116 116" aria-label="风向仪表盘">
+        <defs>
+          <radialGradient id="windFace" cx="48%" cy="42%" r="62%">
+            <stop offset="0%" stop-color="#FFFFFF"/>
+            <stop offset="70%" stop-color="#F2FAFF"/>
+            <stop offset="100%" stop-color="#DFF3FF"/>
+          </radialGradient>
+          <linearGradient id="windNeedle" x1="58" y1="14" x2="58" y2="88" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#01579B"/>
+            <stop offset="100%" stop-color="#29B6F6"/>
+          </linearGradient>
+        </defs>
+        <circle cx="58" cy="58" r="52" fill="url(#windFace)" stroke="#CCE8F7" stroke-width="2"/>
+        <path d="M20 58h76M58 20v76" stroke="#E0EEF6" stroke-width="1"/>
+        <path class="wind-streak s1" d="M 16 86 C 34 72, 58 58, 92 34" fill="none" stroke="#29B6F6" stroke-width="4" stroke-linecap="round"/>
+        <path class="wind-streak s2" d="M 14 68 C 34 58, 56 42, 84 24" fill="none" stroke="#81D4FA" stroke-width="3" stroke-linecap="round"/>
+        <path class="wind-streak s3" d="M 34 98 C 52 82, 76 66, 102 50" fill="none" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+        <text x="58" y="17" text-anchor="middle" font-size="9" fill="#78909C" font-weight="700">迎风</text>
+        <text x="58" y="105" text-anchor="middle" font-size="9" fill="#78909C" font-weight="700">下风</text>
+        <g class="wind-pointer">
+          <path d="M58 14 L66 58 L58 52 L50 58 Z" fill="url(#windNeedle)"/>
+          <path d="M58 94 L63 58 L58 64 L53 58 Z" fill="#90A4AE"/>
+          <circle cx="58" cy="58" r="8" fill="#0277BD"/>
+          <circle cx="58" cy="58" r="3" fill="#E1F5FE"/>
         </g>
       </svg>
     </div>
-    <div class="wind-data">
-      <div class="row"><span class="k">风向</span><span class="v">西南 SW</span></div>
-      <div class="row"><span class="k">风速</span><span class="v">3.4 m/s</span></div>
-      <div class="row"><span class="k">风力</span><span class="v">3 级</span></div>
-      <div class="row"><span class="k">阵风</span><span class="v hot">5.8 m/s</span></div>
-      <div class="row"><span class="k">体感</span><span class="v">31 °C</span></div>
+    <div class="wind-copy">
+      <div class="eyebrow">来风与风险判断</div>
+      <div class="title">西南风稳定，烟羽向东北漂移</div>
+      <div class="desc">风向仪只回答“风怎么走”，用于判断下风口、烟气扩散和布防车辆避让方向。</div>
+      <div class="wind-speed"><span class="num">3.4</span><span class="unit">m/s</span></div>
+      <div class="wind-risk"><span class="pill warn">阵风 5.8 m/s</span><span class="pill">风力 3 级</span></div>
     </div>
+  </div>
+  <div class="wind-data">
+    <div class="row"><span class="k">来风方位</span><span class="v">西南 SW</span></div>
+    <div class="row"><span class="k">下风口</span><span class="v hot">东北 NE</span></div>
+    <div class="row"><span class="k">体感温度</span><span class="v">31 °C</span></div>
   </div>
 </div>
 
@@ -142,7 +693,118 @@
 
 </div>
 
-<script src="_shared.js"></script>
+<script>
+// 共享 Android 状态栏/底栏渲染
+window.renderStatusBar = function() {
+  return `<div class="android-statusbar">
+    <span>10:42</span>
+    <span class="right">
+      <span style="font-size:10px;font-weight:600;letter-spacing:0.5px">LAN</span>
+      <span class="bars"><i></i><i></i><i></i><i></i></span>
+      <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+      <span class="mono">86%</span>
+    </span>
+  </div>`;
+};
+
+window.renderNavBar = function(active) {
+  const items = [
+    { k:'board', l:'打板', href:'01-board.html', i:'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z'},
+    { k:'roster', l:'花名册', href:'02-roster.html', i:'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z'},
+    { k:'history', l:'历史', href:'06-history.html', i:'M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z'},
+    { k:'weather', l:'天气', href:'08-weather.html', i:'M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z'},
+    { k:'me', l:'我', href:'10-settings.html', i:'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'},
+  ];
+  return `<div class="android-navbar">${items.map(it => `
+    <button class="nav-btn ${it.k===active?'active':''}" aria-label="打开${it.l}" aria-current="${it.k===active?'page':'false'}" onclick="location.href='${it.href}'">
+      <svg viewBox="0 0 24 24"><path d="${it.i}"/></svg>
+      <span>${it.l}</span>
+    </button>`).join('')}</div>`;
+};
+
+window.injectChrome = function(opt) {
+  opt = opt || {};
+  const body = document.body;
+  const sb = document.createElement('div');
+  sb.innerHTML = renderStatusBar();
+  body.insertBefore(sb.firstElementChild, body.firstChild);
+  if (opt.nav !== false) {
+    const nb = document.createElement('div');
+    nb.innerHTML = renderNavBar(opt.nav || '');
+    body.appendChild(nb.firstElementChild);
+  }
+};
+
+window.showToast = function(message) {
+  const old = document.querySelector('.toast');
+  if (old) old.remove();
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.setAttribute('role', 'status');
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => toast.remove(), 2600);
+};
+
+window.showBusinessConfirm = function(opts) {
+  opts = opts || {};
+  const previousFocus = document.activeElement;
+  const mask = document.createElement('div');
+  mask.className = 'modal-mask';
+  mask.setAttribute('role', 'dialog');
+  mask.setAttribute('aria-modal', 'true');
+  mask.setAttribute('aria-labelledby', 'businessConfirmTitle');
+  const details = (opts.details || []).map(item => `<div><b>${item.k}</b>：${item.v}</div>`).join('');
+  mask.innerHTML = `<div class="business-modal">
+    <div class="modal-head"><h3 id="businessConfirmTitle">${opts.title || '确认操作'}</h3></div>
+    <div class="modal-body">
+      <div>${opts.message || ''}</div>
+      ${opts.irreversible ? `<div class="modal-warning">${opts.irreversible}</div>` : ''}
+      ${details ? `<div class="risk-list">${details}</div>` : ''}
+    </div>
+    <div class="modal-actions">
+      <button type="button" data-cancel>${opts.cancelText || '取消'}</button>
+      <button type="button" class="${opts.danger ? 'danger' : ''}" data-confirm>${opts.confirmText || '确认'}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(mask);
+  const cancelBtn = mask.querySelector('[data-cancel]');
+  const confirmBtn = mask.querySelector('[data-confirm]');
+  const close = () => {
+    document.removeEventListener('keydown', onKeyDown);
+    mask.remove();
+    if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+  };
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      close();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    const focusables = [cancelBtn, confirmBtn];
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+  document.addEventListener('keydown', onKeyDown);
+  mask.querySelector('[data-cancel]').onclick = close;
+  mask.querySelector('[data-confirm]').onclick = () => {
+    close();
+    if (typeof opts.onConfirm === 'function') opts.onConfirm();
+  };
+  mask.querySelector('[data-cancel]').focus();
+  return mask;
+};
+
+</script>
 <script>
 injectChrome({nav:'weather'});
 function refreshWeather() {
