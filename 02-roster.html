@@ -23,6 +23,11 @@
 .roster-item .info .top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .roster-item .info .name { font-size: 15px; font-weight: 600; color: var(--fg); }
 .roster-item .info .bottom { display: flex; gap: 8px; font-size: 11px; color: var(--muted); margin-top: 3px; font-family: var(--font-mono); }
+.roster-item .info .card-line { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.card-state { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: var(--r-pill); background: var(--success-bg); color: var(--success); font-size: 11px; font-weight: 700; }
+.card-state.empty { background: #FFF3E0; color: var(--warn); }
+.nfc-entry { min-height: 30px; padding: 0 10px; border-radius: var(--r-pill); border: 1px solid var(--primary-light); background: var(--primary-tint); color: var(--primary-dark); font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer; }
+.nfc-entry:active { transform: translateY(1px); }
 .roster-item .right-meta { text-align: right; font-size: 10px; color: var(--muted); }
 .roster-item .right-meta .big { font-size: 14px; font-weight: 600; color: var(--fg-2); font-family: var(--font-mono); }
 .summary { background: var(--surface); padding: 14px 16px; display: flex; justify-content: space-around; border-bottom: 1px solid var(--border-soft); }
@@ -48,6 +53,8 @@
 .edit-numpad button.action { background: var(--primary); color: #fff; }
 .audit-banner { background: #FFF8E1; border: 1px solid #FFE082; padding: 8px 10px; border-radius: var(--r-sm); font-size: 11px; color: #795B00; margin-top: 10px; }
 .result-status { padding: 8px 16px; font-size: 12px; color: var(--muted); background: var(--bg); }
+.nfc-guide { display: none; margin: 8px 16px; padding: 10px 12px; border-radius: var(--r-md); background: var(--info-bg); color: var(--info); font-size: 12px; line-height: 1.45; border: 1px solid rgba(25,118,210,0.16); }
+.nfc-guide b { display: block; margin-bottom: 2px; color: #0D47A1; }
 .roster-empty { display: none; margin: 14px 16px; padding: 22px 16px; border: 1px dashed var(--border); border-radius: var(--r-md); text-align: center; color: var(--muted); background: var(--surface); }
 </style>
 </head>
@@ -81,6 +88,7 @@
     <button class="chip" data-filter="fighter">战斗员</button>
   </div>
   <div class="result-status" id="resultStatus" role="status">显示全部人员 · 12 条</div>
+  <div class="nfc-guide" id="nfcGuide"><b>NFC 制卡与换卡</b>请先确认人员对象，再点击该人员下方的“制卡”或“换卡”。</div>
 
   <div class="summary">
     <div class="item"><div class="num">12</div><div class="lab">在编</div></div>
@@ -95,6 +103,7 @@
     <div class="info">
       <div class="top"><span class="name">唐明</span><span class="pill pill-danger">低气量</span></div>
       <div class="bottom"><span>001</span><span>指挥员</span><span>A型</span><span>28岁</span></div>
+      <div class="card-line"><span class="card-state">NFC 已绑定</span><button class="nfc-entry" onclick="openNfcWrite(event,'唐明','001','A','28','指挥员','38.0','replace')">换卡</button></div>
     </div>
     <div class="right-meta"><div class="big">38.0</div><div>用尽 min</div></div>
   </div>
@@ -105,6 +114,7 @@
     <div class="info">
       <div class="top"><span class="name">王五</span><span class="pill pill-warn">内攻中</span></div>
       <div class="bottom"><span>003</span><span>战斗员</span><span>B型</span><span>26岁</span></div>
+      <div class="card-line"><span class="card-state">NFC 已绑定</span><button class="nfc-entry" onclick="openNfcWrite(event,'王五','003','B','26','战斗员','38.0','replace')">换卡</button></div>
     </div>
     <div class="right-meta"><div class="big">38.0</div><div>用尽 min</div></div>
   </div>
@@ -113,6 +123,7 @@
     <div class="info">
       <div class="top"><span class="name">吴磊</span><span class="pill pill-info">待命</span></div>
       <div class="bottom"><span>011</span><span>战斗员</span><span>A型</span><span>25岁</span></div>
+      <div class="card-line"><span class="card-state empty">未绑卡</span><button class="nfc-entry" onclick="openNfcWrite(event,'吴磊','011','A','25','战斗员','36.5','create')">制卡</button></div>
     </div>
     <div class="right-meta"><div class="big">36.5</div><div>用尽 min</div></div>
   </div>
@@ -123,6 +134,7 @@
     <div class="info">
       <div class="top"><span class="name">李建国</span><span class="pill pill-warn">内攻中</span></div>
       <div class="bottom"><span>004</span><span>战斗员</span><span>O型</span><span>31岁</span></div>
+      <div class="card-line"><span class="card-state">NFC 已绑定</span><button class="nfc-entry" onclick="openNfcWrite(event,'李建国','004','O','31','战斗员','40.0','replace')">换卡</button></div>
     </div>
     <div class="right-meta"><div class="big">40.0</div><div>用尽 min</div></div>
   </div>
@@ -131,6 +143,7 @@
     <div class="info">
       <div class="top"><span class="name">林峰</span><span class="pill pill-success">已出场</span></div>
       <div class="bottom"><span>007</span><span>战斗员</span><span>B型</span><span>27岁</span></div>
+      <div class="card-line"><span class="card-state">NFC 已绑定</span><button class="nfc-entry" onclick="openNfcWrite(event,'林峰','007','B','27','战斗员','37.5','replace')">换卡</button></div>
     </div>
     <div class="right-meta"><div class="big">37.5</div><div>用尽 min</div></div>
   </div>
@@ -141,6 +154,7 @@
     <div class="info">
       <div class="top"><span class="name">张明</span><span class="pill pill-warn">内攻中</span></div>
       <div class="bottom"><span>006</span><span>战斗员</span><span>AB型</span><span>24岁</span></div>
+      <div class="card-line"><span class="card-state empty">未绑卡</span><button class="nfc-entry" onclick="openNfcWrite(event,'张明','006','AB','24','战斗员','36.0','create')">制卡</button></div>
     </div>
     <div class="right-meta"><div class="big">36.0</div><div>用尽 min</div></div>
   </div>
@@ -149,6 +163,7 @@
     <div class="info">
       <div class="top"><span class="name">赵磊</span><span class="pill pill-warn">内攻中</span></div>
       <div class="bottom"><span>008</span><span>战斗员</span><span>O型</span><span>29岁</span></div>
+      <div class="card-line"><span class="card-state">NFC 已绑定</span><button class="nfc-entry" onclick="openNfcWrite(event,'赵磊','008','O','29','战斗员','39.0','replace')">换卡</button></div>
     </div>
     <div class="right-meta"><div class="big">39.0</div><div>用尽 min</div></div>
   </div>
@@ -157,6 +172,7 @@
     <div class="info">
       <div class="top"><span class="name">周浩</span><span class="pill pill-success">已出场</span></div>
       <div class="bottom"><span>009</span><span>战斗员</span><span>A型</span><span>32岁</span></div>
+      <div class="card-line"><span class="card-state">NFC 已绑定</span><button class="nfc-entry" onclick="openNfcWrite(event,'周浩','009','A','32','战斗员','38.5','replace')">换卡</button></div>
     </div>
     <div class="right-meta"><div class="big">38.5</div><div>用尽 min</div></div>
   </div>
@@ -177,6 +193,7 @@ let rosterFilter = 'all';
 const rosterSearch = document.getElementById('rosterSearch');
 const resultStatus = document.getElementById('resultStatus');
 const rosterEmpty = document.getElementById('rosterEmpty');
+const nfcGuide = document.getElementById('nfcGuide');
 
 function applyRosterFilter() {
   const q = rosterSearch.value.trim().toLowerCase();
@@ -201,6 +218,11 @@ document.querySelectorAll('.filter-chip .chip').forEach(chip => {
   });
 });
 rosterSearch.addEventListener('input', applyRosterFilter);
+function openNfcWrite(event, name, id, blood, age, role, airTime, mode) {
+  event.stopPropagation();
+  sessionStorage.setItem('nfcWritePerson', JSON.stringify({ name, id, blood, age, role, airTime, mode }));
+  location.href = '09-nfc-write.html';
+}
 document.querySelectorAll('.roster-item').forEach(item => {
   item.addEventListener('click', () => showToast(`${item.querySelector('.name').textContent} · 已打开人员摘要入口`));
   item.addEventListener('keydown', (e) => {
@@ -211,6 +233,10 @@ document.querySelectorAll('.roster-item').forEach(item => {
   });
 });
 applyRosterFilter();
+if (new URLSearchParams(location.search).get('nfc') === 'manage') {
+  nfcGuide.style.display = 'block';
+  showToast('请选择人员后进行 NFC 制卡或换卡');
+}
 </script>
 </body>
 </html>

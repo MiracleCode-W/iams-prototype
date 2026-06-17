@@ -75,6 +75,47 @@
 }
 .role-chip.selected .dot { background: var(--primary); }
 
+.airtime-panel {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 14px;
+  align-items: center;
+}
+.airtime-gauge {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background:
+    conic-gradient(var(--primary) 0 78%, var(--border-soft) 78% 100%);
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.airtime-gauge::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: var(--surface);
+}
+.airtime-gauge .v {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--primary-dark);
+}
+.airtime-help {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border-radius: var(--r-md);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .nfc-section {
   background: var(--primary-tint);
   border-radius: var(--r-lg);
@@ -246,6 +287,24 @@
 
     <div class="section-card">
       <div class="sec-title">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.14 2 5 5.14 5 9c0 1.61.56 3.09 1.49 4.27L12 22l5.51-8.73C18.44 12.09 19 10.61 19 9c0-3.86-3.14-7-7-7zm0 11.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 4.5 12 4.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-7C10.62 6.5 9.5 7.62 9.5 9S10.62 11.5 12 11.5 14.5 10.38 14.5 9 13.38 6.5 12 6.5z"/></svg>
+        空呼参数
+      </div>
+      <div class="airtime-panel">
+        <div class="airtime-gauge" aria-hidden="true"><span class="v" id="airTimeGauge">38.0</span></div>
+        <div>
+          <div class="field">
+            <label>6.8L 用尽时间 *</label>
+            <input type="number" id="airTime" placeholder="如 38.0" min="20" max="60" step="0.1" value="38.0" inputmode="decimal">
+            <div class="field-error">用尽时间需在 20-60 分钟之间。</div>
+          </div>
+          <div class="airtime-help">按个人 6.8L 气瓶实测消耗时间录入，用于进场后的剩余气量倒计时和低气量预警。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="sec-title">
         <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         血型
       </div>
@@ -335,18 +394,23 @@ function updateNdef() {
   const blood = selectedBlood || '血型';
   const age = document.getElementById('age').value || '年龄';
   const code = document.getElementById('code').value.trim() || '编号';
+  const airTime = document.getElementById('airTime').value || '用尽时间';
+  const airTimeNumber = Number(airTime);
+  document.getElementById('airTimeGauge').textContent = Number.isFinite(airTimeNumber) ? airTimeNumber.toFixed(1) : '38.0';
   document.getElementById('ndefText').textContent =
-    name + '|' + blood + '|' + age + '|' + selectedRole + '|' + code + '|40.0';
+    name + '|' + blood + '|' + age + '|' + selectedRole + '|' + code + '|' + airTime;
 }
 
 document.getElementById('name').addEventListener('input', updateNdef);
 document.getElementById('age').addEventListener('input', updateNdef);
 document.getElementById('code').addEventListener('input', updateNdef);
+document.getElementById('airTime').addEventListener('input', updateNdef);
 
 function submitForm() {
   const name = document.getElementById('name').value.trim();
   const code = document.getElementById('code').value.trim();
   const age = Number(document.getElementById('age').value);
+  const airTime = Number(document.getElementById('airTime').value);
   const pin = document.getElementById('pin').value;
   const pin2 = document.getElementById('pinConfirm').value;
   const errors = [];
@@ -369,6 +433,7 @@ function submitForm() {
   if (!name) mark('name', '姓名不能为空');
   if (!age || age < 18 || age > 60) mark('age', '年龄需在 18-60 岁之间');
   if (!code || existingCodes.includes(code.padStart(3, '0'))) mark('code', '编号为空或已存在');
+  if (!airTime || airTime < 20 || airTime > 60) mark('airTime', '6.8L 用尽时间需在 20-60 分钟之间');
   if (!selectedBlood) {
     document.getElementById('bloodError').style.display = 'block';
     errors.push('请选择血型');
@@ -383,6 +448,15 @@ function submitForm() {
   }
 
   if (nfcOn) {
+    sessionStorage.setItem('nfcWritePerson', JSON.stringify({
+      name,
+      id: code.padStart(3, '0'),
+      blood: selectedBlood,
+      age: String(age),
+      role: selectedRole,
+      airTime: airTime.toFixed(1),
+      mode: 'create'
+    }));
     location.href = '09-nfc-write.html';
   } else {
     var t = document.getElementById('toast');

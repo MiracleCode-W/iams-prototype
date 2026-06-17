@@ -82,22 +82,24 @@
   <div class="section">
     <div class="ttl">人员信息</div>
     <div class="form-row">
-      <div class="fld"><span class="lb">姓名</span><input type="text" value="王五"></div>
-      <div class="fld"><span class="lb">编号</span><input type="text" class="mono" value="003"></div>
-      <div class="fld"><span class="lb">年龄</span><input type="text" class="mono" value="26"></div>
+      <div class="fld"><span class="lb">姓名</span><input id="personName" type="text" value="王五"></div>
+      <div class="fld"><span class="lb">编号</span><input id="personId" type="text" class="mono" value="003"></div>
+      <div class="fld"><span class="lb">年龄</span><input id="personAge" type="text" class="mono" value="26"></div>
       <div class="fld"><span class="lb">血型</span>
         <div class="blood-row">
-          <div class="b">A</div>
-          <div class="b active">B</div>
-          <div class="b">AB</div>
-          <div class="b">O</div>
+          <div class="b" data-blood="A">A</div>
+          <div class="b active" data-blood="B">B</div>
+          <div class="b" data-blood="AB">AB</div>
+          <div class="b" data-blood="O">O</div>
         </div>
       </div>
       <div class="fld"><span class="lb">职务</span>
         <div class="role-tabs">
-          <div class="rt">指挥员</div>
-          <div class="rt active">战斗员</div>
-          <div class="rt">驾驶员</div>
+          <div class="rt" data-role="安全官">安全官</div>
+          <div class="rt" data-role="指挥员">指挥员</div>
+          <div class="rt active" data-role="战斗员">战斗员</div>
+          <div class="rt" data-role="驾驶员">驾驶员</div>
+          <div class="rt" data-role="通讯员">通讯员</div>
         </div>
       </div>
     </div>
@@ -107,7 +109,7 @@
     <div class="ttl">气瓶 · 装备</div>
     <div class="form-row">
       <div class="fld"><span class="lb">气瓶规格</span><input type="text" class="mono" value="6.8 L · 30 MPa"></div>
-      <div class="fld"><span class="lb">用尽时间</span><input type="text" class="mono" value="38.0 min"></div>
+      <div class="fld"><span class="lb">用尽时间</span><input id="airTime" type="text" class="mono" value="38.0 min"></div>
       <div class="fld"><span class="lb">NFC UID</span><input type="text" class="mono" value="04:A3:B2:C1:D5:E7:F9" disabled style="color:var(--muted)"></div>
     </div>
   </div>
@@ -115,7 +117,7 @@
   <div class="section">
     <div class="ttl">现场校验结果</div>
     <div class="form-row">
-      <div class="fld"><span class="lb">卡片归属</span><input type="text" value="这张卡属于王五本人" readonly></div>
+      <div class="fld"><span class="lb">卡片归属</span><input id="cardOwner" type="text" value="这张卡属于王五本人" readonly></div>
       <div class="fld"><span class="lb">站点范围</span><input type="text" value="仅可在朝阳三站使用" readonly></div>
       <div class="fld"><span class="lb">内容状态</span><input type="text" value="标签内容未被篡改" readonly></div>
       <div class="fld"><span class="lb">失败处理</span><input type="text" value="不通过时只能手动降级" readonly></div>
@@ -126,14 +128,14 @@
     <div class="ttl">NDEF 预览</div>
     <div class="preview-card">
       <div class="lb">TEXT/UTF-8</div>
-      <div class="raw">v1<b>|</b>FS-BJ-CY-003<b>|</b>003<b>|</b>王五,B,26,战斗员,38.0<b>|</b>A94C-7F2B</div>
+      <div class="raw" id="ndefRaw">v1<b>|</b>FS-BJ-CY-003<b>|</b>003<b>|</b>王五,B,26,战斗员,38.0<b>|</b>A94C-7F2B</div>
       <div class="size-row"><span>58 字节 / 137 max</span><span>NTAG213 · NDEF</span></div>
     </div>
   </div>
 
   <div class="trust-card">
     <div class="th">写入前可信规则</div>
-    <div class="rule"><div class="ok">✓</div><div class="txt"><b>这张卡只绑定王五一人</b><span>换卡需管理员先解除旧卡绑定</span></div></div>
+    <div class="rule"><div class="ok">✓</div><div class="txt"><b id="singleOwnerRule">这张卡只绑定王五一人</b><span id="replaceRule">换卡需管理员先解除旧卡绑定</span></div></div>
     <div class="rule"><div class="ok">✓</div><div class="txt"><b>这张卡只允许本站使用</b><span>跨站标签不能直接进出场</span></div></div>
     <div class="rule"><div class="ok warn">!</div><div class="txt"><b>校验失败不允许自动进场</b><span>必须走手动降级，并保留原因</span></div></div>
   </div>
@@ -162,6 +164,46 @@
 <script src="_shared.js"></script>
 <script>
 injectChrome({nav:'roster'});
+let nfcPerson = { name: '王五', id: '003', blood: 'B', age: '26', role: '战斗员', airTime: '38.0', mode: 'replace' };
+try {
+  const savedPerson = JSON.parse(sessionStorage.getItem('nfcWritePerson') || 'null');
+  if (savedPerson && savedPerson.name && savedPerson.id) nfcPerson = { ...nfcPerson, ...savedPerson };
+} catch (err) {}
+
+function setActiveValue(selector, dataAttr, value) {
+  document.querySelectorAll(selector).forEach(el => {
+    el.classList.toggle('active', el.dataset[dataAttr] === value);
+  });
+}
+
+function bindNfcPerson() {
+  document.getElementById('personName').value = nfcPerson.name;
+  document.getElementById('personId').value = nfcPerson.id;
+  document.getElementById('personAge').value = nfcPerson.age;
+  document.getElementById('airTime').value = `${nfcPerson.airTime} min`;
+  document.getElementById('cardOwner').value = `这张卡属于${nfcPerson.name}本人`;
+  document.getElementById('ndefRaw').innerHTML = `v1<b>|</b>FS-BJ-CY-003<b>|</b>${nfcPerson.id}<b>|</b>${nfcPerson.name},${nfcPerson.blood},${nfcPerson.age},${nfcPerson.role},${nfcPerson.airTime}<b>|</b>A94C-7F2B`;
+  document.getElementById('singleOwnerRule').textContent = `这张卡只绑定${nfcPerson.name}一人`;
+  document.getElementById('replaceRule').textContent = nfcPerson.mode === 'create' ? '制卡前需确认标签为空白状态' : '换卡需管理员先解除旧卡绑定';
+  setActiveValue('.blood-row .b', 'blood', nfcPerson.blood);
+  setActiveValue('.role-tabs .rt', 'role', nfcPerson.role);
+}
+
+function readNfcPersonFromForm() {
+  const activeBlood = document.querySelector('.blood-row .b.active');
+  const activeRole = document.querySelector('.role-tabs .rt.active');
+  nfcPerson = {
+    ...nfcPerson,
+    name: document.getElementById('personName').value.trim() || nfcPerson.name,
+    id: document.getElementById('personId').value.trim() || nfcPerson.id,
+    age: document.getElementById('personAge').value.trim() || nfcPerson.age,
+    blood: activeBlood ? activeBlood.dataset.blood : nfcPerson.blood,
+    role: activeRole ? activeRole.dataset.role : nfcPerson.role,
+    airTime: document.getElementById('airTime').value.replace(/min/i, '').trim() || nfcPerson.airTime
+  };
+  bindNfcPerson();
+}
+
 document.querySelectorAll('.role-tabs .rt').forEach(el => {
   el.addEventListener('click', () => {
     document.querySelectorAll('.role-tabs .rt').forEach(o => o.classList.remove('active'));
@@ -174,14 +216,16 @@ document.querySelectorAll('.blood-row .b').forEach(el => {
     el.classList.add('active');
   });
 });
+bindNfcPerson();
 function confirmWriteNfc() {
+  readNfcPersonFromForm();
   showBusinessConfirm({
     title: '写入并绑定 NFC',
-    message: '写入成功后，这张卡将绑定王五本人，只能在本站通过校验后使用；技术校验值会同时写入审计日志。',
+    message: `写入成功后，这张卡将绑定${nfcPerson.name}本人，只能在本站通过校验后使用；技术校验值会同时写入审计日志。`,
     irreversible: '不可撤销：换卡必须由管理员解除旧卡绑定，不能直接覆盖。',
     confirmText: '确认写入',
     details: [
-      { k: '人员', v: '王五 · 编号 003' },
+      { k: '人员', v: `${nfcPerson.name} · 编号 ${nfcPerson.id}` },
       { k: '现场判断', v: '属于本站 · 属于本人 · 标签未被篡改' },
       { k: '技术详情', v: 'UID 04:A3…F9 · checksum A94C-7F2B' }
     ],
